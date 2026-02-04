@@ -1,0 +1,71 @@
+﻿@page "/navs/add/{FundId:int}"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject INavHistoryRepo NavRepo
+@inject NavigationManager Navigation
+
+<h3>Add NAV</h3>
+
+@* <EditForm Model="nav" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">NAV Date</label>
+        <InputDate class="form-control" @bind-Value="nav.NavDate" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">NAV Value</label>
+        <InputNumber class="form-control" @bind-Value="nav.NavValue" />
+    </div>
+
+    <button class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-secondary ms-2" @onclick="Back">Cancel</button>
+</EditForm> *@
+
+@code {
+    [Parameter] public int FundId { get; set; }   // this comes from URL
+
+    private NavHistory nav = new();
+
+    protected override void OnInitialized()
+    {
+        nav.MutualFundId = FundId;
+        nav.NavDate = DateTime.Today;
+    }
+
+    private async Task HandleSubmit()
+    {
+        await NavRepo.AddAsync(nav);
+
+        // 🚀 This is the KEY:
+        // Navigate back to NavList with fund ID in URL
+        Navigation.NavigateTo($"/navs/{FundId}");
+    }
+
+    private void Back()
+    {
+        Navigation.NavigateTo($"/navs/{FundId}");
+    }
+}
+
+<EditForm Model="nav" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">NAV Date</label>
+        <InputDate class="form-control" @bind-Value="nav.NavDate" />
+        <ValidationMessage For="@(() => nav.NavDate)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">NAV Value</label>
+        <InputNumber class="form-control" @bind-Value="nav.NavValue" />
+        <ValidationMessage For="@(() => nav.NavValue)" />
+    </div>
+
+    <button class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-secondary ms-2" @onclick="Back">Cancel</button>
+</EditForm>

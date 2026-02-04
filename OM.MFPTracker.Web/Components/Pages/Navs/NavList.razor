@@ -1,0 +1,180 @@
+﻿@inject INavHistoryRepo NavRepo
+@inject IMutualFundRepo FundRepo
+@inject NavigationManager Navigation
+@page "/navs"
+@page "/navs/{SelectedFundId:int?}"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+
+@code {
+    [Parameter] public int? SelectedFundId { get; set; }
+
+    private List<MutualFund> funds = new();
+    private List<NavHistory> navs = new();
+
+    private int? selectedFundId;
+    private int pageNumber = 1;
+    private const int pageSize = 10;
+    private int totalPages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        funds = await FundRepo.GetAllAsync();
+        // Restore selected fund from route parameter
+        if (SelectedFundId.HasValue && funds.Any(f => f.Id == SelectedFundId.Value))
+        {
+            selectedFundId = SelectedFundId;
+            await LoadNavs();
+        }
+    }
+
+    private async Task OnFundChanged(ChangeEventArgs e)
+    {
+        pageNumber = 1;
+
+        if (int.TryParse(e.Value?.ToString(), out var fundId))
+        {
+            selectedFundId = fundId;
+            await LoadNavs();
+        }
+        else
+        {
+            selectedFundId = null;
+            navs.Clear();
+        }
+    }
+
+    // private async Task LoadNavs()
+    // {
+    //     if (!selectedFundId.HasValue)
+    //         return;
+
+    //     var count = await NavRepo.GetCountByFundAsync(selectedFundId.Value);
+    //     totalPages = (int)Math.Ceiling(count / (double)pageSize);
+
+    //     navs = await NavRepo.GetPagedByFundAsync(
+    //         selectedFundId.Value,
+    //         pageNumber,
+    //         pageSize, );
+    // }
+    private async Task LoadNavs()
+    {
+        if (!selectedFundId.HasValue)
+            return;
+
+        var count = await NavRepo.GetCountByFundAsync(selectedFundId.Value);
+        totalPages = (int)Math.Ceiling(count / (double)pageSize);
+
+        // Fetch NAVs ordered by NavDate descending
+        navs = await NavRepo.GetPagedByFundAsync(
+            selectedFundId.Value, pageNumber, pageSize,
+            orderByDescending: true);
+
+        StateHasChanged();
+    }
+
+    private async Task NextPage()
+    {
+        pageNumber++;
+        await LoadNavs();
+    }
+
+    private async Task PrevPage()
+    {
+        pageNumber--;
+        await LoadNavs();
+    }
+
+    private void AddNav()
+    {
+        Navigation.NavigateTo($"/navs/add/{selectedFundId}");
+    }
+
+    private void BulkNav()
+    {
+        Navigation.NavigateTo($"/navs/bulk/{selectedFundId}");
+    }
+
+    private void EditNav(int navId) => Navigation.NavigateTo($"/navs/edit/{navId}");
+    private void DeleteNav(int navId) => Navigation.NavigateTo($"/navs/delete/{navId}");
+}
+
+<h3>NAV History</h3>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Mutual Fund</label>
+        <select class="form-select" @onchange="OnFundChanged">
+            <option value="">-- Select Mutual Fund --</option>
+            @foreach (var f in funds)
+            {
+                <option value="@f.Id" selected="@(f.Id == selectedFundId)">
+                    @f.SchemeName
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-6 d-flex align-items-end gap-2">
+        <button class="btn btn-primary"
+                disabled="@(!selectedFundId.HasValue)"
+                @onclick="AddNav">
+            Add NAV
+        </button>
+
+        <button class="btn btn-secondary"
+                disabled="@(!selectedFundId.HasValue)"
+                @onclick="BulkNav">
+            Bulk Insert
+        </button>
+    </div>
+</div>
+
+@if (!selectedFundId.HasValue)
+{
+    <p class="text-muted">Select a mutual fund to view NAV history.</p>
+}
+else
+{
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th style="width:25%;">Date</th>
+                <th style="width:25%;">NAV</th>
+                <th style="width:150px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var nav in navs)
+            {
+                <tr>
+                    <td>@nav.NavDate.ToShortDateString()</td>
+                    <td>@nav.NavValue</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="@(() => EditNav(nav.Id))">Edit</button>
+                        <button class="btn btn-sm btn-danger ms-1" @onclick="@(() => DeleteNav(nav.Id))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-sm btn-outline-primary"
+                disabled="@(pageNumber == 1)"
+                @onclick="PrevPage">
+            Previous
+        </button>
+
+        <span>
+            Page @pageNumber of @totalPages
+        </span>
+
+        <button class="btn btn-sm btn-outline-primary"
+                disabled="@(pageNumber == totalPages)"
+                @onclick="NextPage">
+            Next
+        </button>
+    </div>
+}

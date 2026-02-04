@@ -1,0 +1,62 @@
+﻿@page "/navs/edit/{NavId:int}"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject INavHistoryRepo NavRepo
+@inject NavigationManager Navigation
+
+@code {
+    [Parameter] public int NavId { get; set; }
+    private NavHistory? nav;
+
+    protected override async Task OnInitializedAsync()
+    {
+        nav = await NavRepo.GetByIdAsync(NavId);
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (nav != null)
+        {
+            await NavRepo.UpdateAsync(nav);
+
+            // Navigate back to the NAV list with the same fund selected
+            Navigation.NavigateTo($"/navs/{nav.MutualFundId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        if (nav != null)
+            Navigation.NavigateTo($"/navs/{nav.MutualFundId}");
+        else
+            Navigation.NavigateTo("/navs");
+    }
+}
+<h3>Edit NAV</h3>
+
+@if (nav == null)
+{
+    <p class="text-muted">Loading...</p>
+}
+else
+{
+    <EditForm Model="nav" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">NAV Date</label>
+            <InputDate class="form-control" @bind-Value="nav.NavDate" />
+            <ValidationMessage For="@(() => nav.NavDate)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">NAV Value</label>
+            <InputNumber class="form-control" @bind-Value="nav.NavValue" />
+            <ValidationMessage For="@(() => nav.NavValue)" />
+        </div>
+
+        <button class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Cancel</button>
+    </EditForm>
+}

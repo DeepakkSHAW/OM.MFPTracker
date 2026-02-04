@@ -1,0 +1,52 @@
+﻿@page "/navs/delete/{NavId:int}"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject INavHistoryRepo NavRepo
+@inject NavigationManager Navigation
+
+@code {
+    [Parameter] public int NavId { get; set; }
+    private NavHistory? nav;
+
+    protected override async Task OnInitializedAsync()
+    {
+        nav = await NavRepo.GetByIdAsync(NavId);
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (nav != null)
+        {
+            var fundId = nav.MutualFundId;
+
+            await NavRepo.DeleteAsync(NavId);
+
+            // Navigate back to the NAV list of the same fund
+            Navigation.NavigateTo($"/navs/{fundId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        if (nav != null)
+            Navigation.NavigateTo($"/navs/{nav.MutualFundId}");
+        else
+            Navigation.NavigateTo("/navs");
+    }
+}
+
+<h3>Delete NAV</h3>
+
+@if (nav == null)
+{
+    <p class="text-muted">Loading...</p>
+}
+else
+{
+    <div class="alert alert-warning">
+        Are you sure you want to delete NAV <strong>@nav.NavValue</strong> dated <strong>@nav.NavDate.ToShortDateString()</strong>?
+    </div>
+
+    <button class="btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+    <button class="btn btn-secondary ms-2" @onclick="Cancel">Cancel</button>
+}

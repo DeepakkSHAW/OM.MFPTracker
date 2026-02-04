@@ -117,12 +117,13 @@ namespace OM.MFPTracker.Data.Models
         public MutualFund MutualFund { get; set; } = null!;
 
 		// NAV details
-		[Required]
+		[Required(ErrorMessage = "NAV Date is required")]
 		[DataType(DataType.Date)]
+		[DateInPastOrToday(ErrorMessage = "NAV date cannot be in the future")]
 		public DateTime NavDate { get; set; }
 
-		[Required]
-		[Precision(18, 4)]
+		[Required(ErrorMessage = "NAV Value is required")]
+		[Range(0.000001, double.MaxValue, ErrorMessage = "NAV must be greater than 0")]
 		public decimal NavValue { get; set; }
 		// Audit
 		public DateTime InDate { get; set; }

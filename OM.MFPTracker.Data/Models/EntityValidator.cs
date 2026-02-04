@@ -7,7 +7,18 @@ using System.Threading.Tasks;
 
 namespace OM.MFPTracker.Data.Models
 {
-    public class DateInPastAttribute : ValidationAttribute
+	public class DateInPastOrTodayAttribute : ValidationAttribute
+	{
+		public override bool IsValid(object? value)
+		{
+			if (value is DateTime date)
+			{
+				return date.Date <= DateTime.Today;
+			}
+			return true; // Not a date? Let Required handle it
+		}
+	}
+	public class DateInPastAttribute : ValidationAttribute
     {
         public override bool IsValid(object? value)
         {
