@@ -1,0 +1,45 @@
+﻿@page "/categories"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject IMFCategoryRepo Repo
+@inject NavigationManager Navigation
+
+@code {
+    private List<MFCategory> categories = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Repo.GetAllAsync();
+    }
+
+
+    private async Task Delete(int id)
+    {
+        await Repo.DeleteAsync(id);
+        categories = await Repo.GetAllAsync();
+    }
+}
+
+<h3>MF Categories</h3>
+
+
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in categories)
+        {
+            <tr>
+                <td>@c.CategoryName</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" @onclick="@(() => Navigation.NavigateTo($"/categories/edit/{c.Id}"))">Edit</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(c.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

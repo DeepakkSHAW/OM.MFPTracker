@@ -1,0 +1,74 @@
+﻿@* @using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject IMutualFundRepo FundRepo
+@inject IMFCategoryRepo CategoryRepo
+@inject NavigationManager NavManager
+
+@code {
+    [Parameter] public MutualFund Fund { get; set; } = new();
+    private List<MFCategory> categories = [];
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await CategoryRepo.GetAllAsync();
+    }
+
+
+    private async Task Save()
+    {
+        if (Fund.Id == 0)
+            await FundRepo.AddAsync(Fund);
+        else
+            await FundRepo.UpdateAsync(Fund);
+
+
+        NavManager.NavigateTo("/funds");
+    }
+}
+
+<EditForm Model="Fund" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+
+    <div class="mb-3">
+        <label>Scheme Code</label>
+        <InputText class="form-control" @bind-Value="Fund.SchemeCode" />
+        <ValidationMessage For="() => Fund.SchemeCode" />
+    </div>
+
+
+    <div class="mb-3">
+        <label>ISIN</label>
+        <InputText class="form-control" @bind-Value="Fund.ISIN" />
+        <ValidationMessage For="() => Fund.ISIN" />
+    </div>
+
+
+    <div class="mb-3">
+        <label>Scheme Name</label>
+        <InputText class="form-control" @bind-Value="Fund.SchemeName" />
+        <ValidationMessage For="() => Fund.SchemeName" />
+    </div>
+
+
+    <div class="mb-3">
+        <label>Category</label>
+        <InputSelect class="form-select" @bind-Value="Fund.MFCategoryId">
+            <option value="">-- Select Category --</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id">@c.CategoryName</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Fund.MFCategoryId" />
+    </div>
+
+
+    <button class="btn btn-success">Save</button>
+    <button class="btn btn-secondary" type="button" @onclick="@(() => NavManager.NavigateTo("/funds"))">Cancel</button>
+</EditForm>
+
+
+ *@

@@ -1,0 +1,6 @@
+<Solution>
+	<Project Path = "OM.MFPTracker.Data\OM.MFPTracker.Data.csproj"/>
+	<Project Path = "OM.MFPTracker.Web\OM.MFPTracker.Web.csproj"/>
+	<Project Path = "OM.MFPTracker.Console\OM.MFPTracker.Console.csproj"/>
+	<Project path = "ConsoleApp.Test\ConsoleApp.Test.csproj"/>
+<Solution>

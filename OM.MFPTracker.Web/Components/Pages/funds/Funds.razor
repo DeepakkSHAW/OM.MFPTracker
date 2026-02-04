@@ -1,0 +1,63 @@
+﻿@page "/funds"
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+
+@inject IMutualFundRepo FundRepo
+@inject NavigationManager NavManager
+
+@code {
+    private List<MutualFund> funds = [];
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        funds = await FundRepo.GetAllAsync();
+    }
+
+
+    private async Task Delete(int id)
+    {
+        await FundRepo.DeleteAsync(id);
+        funds = await FundRepo.GetAllAsync();
+    }
+}
+
+
+
+
+
+<h3>Mutual Funds</h3>
+
+
+<NavLink class="btn btn-primary" href="/funds/add">Add Mutual Fund</NavLink>
+
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Scheme Code</th>
+            <th>ISIN</th>
+            <th>Scheme Name</th>
+            <th>Category</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var f in funds)
+        {
+            <tr>
+                <td>@f.SchemeCode</td>
+                <td>@f.ISIN</td>
+                <td>@f.SchemeName</td>
+                <td>@f.MFCategory?.CategoryName</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" @onclick="@(() => NavManager.NavigateTo($"/funds/edit/{f.Id}"))">Edit</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(f.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

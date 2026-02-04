@@ -1,0 +1,69 @@
+﻿@page "/people"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager Navigation
+
+@inject IPersonRepo PersonRepo
+
+<h3>People</h3>
+<button class="btn btn-success mb-2" 
+        @onclick="GoToAddPerson">
+    Add Person
+</button>
+@code {
+    private List<Person>? people;
+
+    protected override async Task OnInitializedAsync()
+    {
+        people = await PersonRepo.GetAllAsync();
+    }
+        void GoToAddPerson()
+    {
+        Navigation.NavigateTo("/add-person");
+    }
+    void EditPerson(int id)
+    {
+        Navigation.NavigateTo($"/edit-person/{id}");
+    }
+}
+
+@if (people == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!people.Any())
+{
+    <p>No people found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>DOB</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in people)
+            {
+                <tr>
+                    <td>@p.Id</td>
+                    <td>@p.FirstName</td>
+                    <td>@p.LastName</td>
+                    <td>@p.DateOfBirth.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="() => EditPerson(p.Id)">
+                            Edit
+                        </button>
+                     </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

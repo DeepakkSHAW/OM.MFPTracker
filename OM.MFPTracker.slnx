@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Learnings.txt" />
+  </Folder>
+  <Project Path="ConsoleApp.Test/ConsoleApp.Test.csproj" />
+  <Project Path="OM.MFPTracker.Console/OM.MFPTracker.Console.csproj" />
+  <Project Path="OM.MFPTracker.Data/OM.MFPTracker.Data.csproj" />
+  <Project Path="OM.MFPTracker.Web/OM.MFPTracker.Web.csproj" />
+</Solution>

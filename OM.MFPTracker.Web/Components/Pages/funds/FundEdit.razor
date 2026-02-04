@@ -1,0 +1,19 @@
+﻿@page "/funds/edit/{Id:int}"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject IMutualFundRepo FundRepo
+
+
+<FundForm Fund="fund" />
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private MutualFund fund = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        fund = await FundRepo.GetByIdAsync(Id) ?? new();
+    }
+}
