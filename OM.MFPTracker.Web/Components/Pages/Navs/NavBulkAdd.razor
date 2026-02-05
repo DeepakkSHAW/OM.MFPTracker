@@ -1,0 +1,130 @@
+﻿@page "/navs/bulk-add/{FundId:int}"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+
+@inject IMutualFundRepo FundRepo
+@inject INavHistoryRepo NavRepo
+@inject NavigationManager Navigation
+
+@code {
+    [Parameter] public int FundId { get; set; }
+
+    private MutualFund? fund;
+    private string rawInput = "";
+    private string? error;
+    private string? loadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            fund = await FundRepo.GetByIdAsync(FundId);
+
+            if (fund == null)
+                loadError = $"Mutual Fund not found (Id={FundId})";
+        }
+        catch (Exception ex)
+        {
+            loadError = ex.Message;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        error = null;
+
+        try
+        {
+            var navs = ParseInput();
+            await NavRepo.BulkInsertAsync(navs);
+
+            Navigation.NavigateTo($"/navs/{FundId}");
+        }
+        catch (Exception ex)
+        {
+            //error = ex.Message;
+            // Check if it's a unique constraint violation (SQLite error code 19)
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                error = "Duplicate data - NAV Value already registered on this date";
+            }
+            else
+            {
+                error = "An unexpected error occurred while saving.";
+            }
+        }
+    }
+
+    private List<NavHistory> ParseInput()
+    {
+        var navs = new List<NavHistory>();
+        var lines = rawInput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines)
+        {
+            var parts = line.Split(',', StringSplitOptions.TrimEntries);
+            if (parts.Length != 2)
+                throw new Exception($"Invalid line: {line}");
+
+            if (!DateTime.TryParse(parts[0], out var date))
+                throw new Exception($"Invalid date: {parts[0]}");
+
+            if (date.Date > DateTime.Today)
+                throw new Exception("Future dates are not allowed");
+
+            if (!decimal.TryParse(parts[1], out var nav) || nav <= 0)
+                throw new Exception($"Invalid NAV: {parts[1]}");
+
+            navs.Add(new NavHistory
+            {
+                MutualFundId = FundId,
+                NavDate = date,
+                NavValue = nav
+            });
+        }
+
+        if (!navs.Any())
+            throw new Exception("No valid NAV rows found");
+
+        return navs;
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo($"/navs/{FundId}");
+    }
+}
+
+
+<h4>Bulk NAV Insert</h4>
+
+@if (!string.IsNullOrEmpty(loadError))
+{
+    <div class="alert alert-danger">@loadError</div>
+}
+else if (fund == null)
+{
+    <p>Loading fund details...</p>
+}
+else
+{
+    <form @onsubmit="HandleSubmit">
+        <div class="mb-3">
+            <strong>Mutual Fund:</strong> @fund.SchemeName
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Paste NAV data (Date, NAV)</label>
+            <textarea class="form-control"
+                      rows="8"
+                      @bind="rawInput"
+                      placeholder="yyyy-MM-dd (date), 123.45 (NAV Value)">
+                                </textarea>
+        </div>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+        <button class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Cancel</button>
+    </form>
+}

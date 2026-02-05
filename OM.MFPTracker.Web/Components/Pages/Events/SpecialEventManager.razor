@@ -1,0 +1,197 @@
+﻿@page "/special-events"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@using OM.MFPTracker.Data.Helper
+@inject ISpecialEventRepo SpecialEventRepo
+@inject IJSRuntime JSRuntime
+
+@code {
+    private List<SpecialEvent> events = new();
+    private SpecialEvent editingEvent = new();
+    private bool isEditing = false;
+
+    // Pagination
+    private int CurrentPage = 1;
+    private int PageSize = 10; // show 10 events per page
+    private int TotalPages => (int)Math.Ceiling((double)events.Count / PageSize);
+
+    private IEnumerable<SpecialEvent> PagedEvents =>
+        events.Skip((CurrentPage - 1) * PageSize).Take(PageSize);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        events = (await SpecialEventRepo.GetAllAsync())
+                    .OrderByDescending(e => e.EventDate) // descending by date
+                    .ToList();
+
+        CurrentPage = 1; // reset page
+    }
+
+    private void StartAdd()
+    {
+        editingEvent = new SpecialEvent
+        {
+            EventDate = DateTime.Today,
+            EventType = EventType.MinorEvent
+        };
+        isEditing = true;
+    }
+
+    private void EditEvent(SpecialEvent evt)
+    {
+        editingEvent = evt; // track existing entity
+        isEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+        editingEvent = new SpecialEvent();
+    }
+
+    private async Task SaveEvent()
+    {
+        if (editingEvent.Id == 0)
+        {
+            await SpecialEventRepo.AddAsync(editingEvent);
+        }
+        else
+        {
+            await SpecialEventRepo.UpdateAsync(editingEvent);
+        }
+
+        isEditing = false;
+        await LoadEvents();
+    }
+
+    private async Task DeleteEvent(int id)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure to delete this event?");
+        if (confirmed)
+        {
+            await SpecialEventRepo.DeleteAsync(id);
+            await LoadEvents();
+        }
+    }
+
+    private string GetRowClass(EventType type) => type switch
+    {
+        EventType.MajorEvent => "table-danger",
+        EventType.MinorEvent => "table-warning",
+        EventType.Regulatory => "table-info",
+        EventType.Macroeconomic => "table-primary",
+        EventType.CorporateAction => "table-success",
+        EventType.Elections => "table-secondary",
+        EventType.GlobalEvent => "table-dark text-white",
+        EventType.EarningsRelease => "table-light",
+        _ => ""
+    };
+
+    // Pagination handlers
+    private void PrevPage() { if (CurrentPage > 1) CurrentPage--; }
+    private void NextPage() { if (CurrentPage < TotalPages) CurrentPage++; }
+    private void GoToPage(int page) { CurrentPage = page; }
+}
+
+<h3>Special Events Manager</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="StartAdd">Add New Event</button>
+</div>
+
+@if (isEditing)
+{
+    <EditForm Model="editingEvent" OnValidSubmit="SaveEvent">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-2">
+            <label>Date</label>
+            <InputDate class="form-control" @bind-Value="editingEvent.EventDate" />
+        </div>
+
+        <div class="mb-2">
+            <label>Title</label>
+            <InputText class="form-control" @bind-Value="editingEvent.Title" />
+        </div>
+
+        <div class="mb-2">
+            <label>Event Type</label>
+@*             <InputSelect class="form-select" @bind-Value="editingEvent.EventType">
+                @foreach (var type in Enum.GetValues<EventType>())
+                {
+                    <option value="@type">@type.ToString()</option>
+                }
+            </InputSelect> *@
+            <InputSelect class="form-select" @bind-Value="editingEvent.EventType">
+                @foreach (var type in Enum.GetValues<EventType>())
+                {
+                    <option value="@type">@Helper.GetDisplayName(type)</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-2">
+            <label>Notes</label>
+            <InputTextArea class="form-control" @bind-Value="editingEvent.Notes" />
+        </div>
+
+        <button type="submit" class="btn btn-success me-2">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+    </EditForm>
+}
+else
+{
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Notes</th>
+                <th style="width:120px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evt in PagedEvents)
+            {
+                <tr class="@GetRowClass(evt.EventType)">
+                    <td>@evt.EventDate.ToShortDateString()</td>
+                    <td>@evt.Title</td>
+@*                     <td>@evt.EventType.ToString()</td> *@
+                    <td>@Helper.GetDisplayName(evt.EventType)</td>
+                    <td>@evt.Notes</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditEvent(evt)">Edit</button>
+                        <button class="btn btn-sm btn-danger ms-1" @onclick="() => DeleteEvent(evt.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="PrevPage">Previous</button>
+            </li>
+
+            @for (int i = 1; i <= TotalPages; i++)
+            {
+                <li class="page-item @(i == CurrentPage ? "active" : "")">
+                    <button class="page-link" @onclick="@(() => GoToPage(i))">@i</button>
+                </li>
+            }
+
+            <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="NextPage">Next</button>
+            </li>
+        </ul>
+    </nav>
+}

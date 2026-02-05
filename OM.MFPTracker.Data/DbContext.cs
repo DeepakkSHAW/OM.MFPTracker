@@ -15,6 +15,7 @@ namespace OM.MFPTracker.Data
 		public DbSet<MFCategory> MFCategories => Set<MFCategory>();
 		public DbSet<MutualFund> MutualFunds => Set<MutualFund>();
 		public DbSet<NavHistory> NavHistories => Set<NavHistory>();
+		public DbSet<SpecialEvent> SpecialEvents => Set<SpecialEvent>();
 		public DbSet<Person> People => Set<Person>();
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
@@ -32,7 +33,6 @@ namespace OM.MFPTracker.Data
 
 			//optionsBuilder.UseSqlite("", options => options.MaxBatchSize(512));
 			//optionsBuilder.EnableSensitiveDataLogging();
-
 
 		}
 
@@ -170,6 +170,35 @@ namespace OM.MFPTracker.Data
 				new NavHistory { Id = 3, MutualFundId = 2, NavDate = new DateTime(2024, 01, 01), NavValue = 98.7500m },
 				new NavHistory { Id = 4, MutualFundId = 2, NavDate = new DateTime(2024, 01, 02), NavValue = 99.2500m }
 			);
+			
+			modelBuilder.Entity<SpecialEvent>(entity =>
+			{
+				entity.ToTable("TSpecialEvents");
+
+				// Primary key
+				entity.HasKey(e => e.Id);
+
+				// Required properties
+				entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+
+				entity.Property(e => e.EventDate).IsRequired();
+
+				entity.Property(e => e.Notes).HasMaxLength(500);
+
+				// Enum: store as string for readability
+				entity.Property(e => e.EventType).HasConversion<string>().HasMaxLength(50).IsRequired();
+
+				// Index on EventDate for faster lookup / filter
+				entity.HasIndex(e => e.EventDate);
+				// Seed sample data
+				entity.HasData(
+					new SpecialEvent { Id = 1, EventDate = new DateTime(2026, 1, 9), Title = "Election in West Bengal", EventType = EventType.Elections, Notes = "No major impact on stock market" },
+					new SpecialEvent { Id = 2, EventDate = new DateTime(2026, 2, 1), Title = "India Budget Date", EventType = EventType.MajorEvent, Notes = "Market expected to react to budget announcements" },
+					new SpecialEvent { Id = 3, EventDate = new DateTime(2026, 3, 15), Title = "Quarterly Corporate Earnings Release", EventType = EventType.EarningsRelease, Notes = "Top 10 index companies releasing Q4 earnings" },
+					new SpecialEvent { Id = 4, EventDate = new DateTime(2026, 4, 1), Title = "RBI Policy Meeting", EventType = EventType.Macroeconomic, Notes = "Expectations of interest rate decision" }
+				);
+			});
+
 
 			//modelBuilder.Entity<PortfolioHolding>()
 			//    .HasIndex(x => new { x.PortfolioId, x.MutualFundId })

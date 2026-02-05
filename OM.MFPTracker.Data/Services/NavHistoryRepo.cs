@@ -16,6 +16,7 @@ namespace OM.MFPTracker.Data.Services
 		Task BulkInsertAsync(IEnumerable<NavHistory> navHistories);
 		Task<List<NavHistory>> GetPagedByFundAsync(int mutualFundId, int pageNumber, int pageSize, bool orderByDescending = false);
 		Task<int> GetCountByFundAsync(int mutualFundId);
+		Task<HashSet<DateTime>> GetExistingNavDatesAsync(int mutualFundId);
 		Task DeleteAsync(int id);
 	}
 	public class NavHistoryRepo : INavHistoryRepo
@@ -109,6 +110,14 @@ namespace OM.MFPTracker.Data.Services
 			return await _db.NavHistories
 				.CountAsync(n => n.MutualFundId == mutualFundId);
 		}
+		public async Task<HashSet<DateTime>> GetExistingNavDatesAsync(int mutualFundId)
+		{
+			return await _db.NavHistories
+				.Where(n => n.MutualFundId == mutualFundId)
+				.Select(n => n.NavDate.Date)
+				.ToHashSetAsync();
+		}
+
 		public async Task DeleteAsync(int id)
 		{
 			var entity = await _db.NavHistories.FindAsync(id);

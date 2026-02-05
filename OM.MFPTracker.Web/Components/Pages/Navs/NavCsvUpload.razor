@@ -1,0 +1,258 @@
+﻿@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@using OM.MFPTracker.Web.Models.ViewModels
+@inject INavHistoryRepo NavRepo
+@inject IMutualFundRepo FundRepo
+@inject NavigationManager Navigation
+@page "/navs/upload/{FundId:int}"
+<h4>Upload NAVs (CSV)</h4>
+
+@code {
+    [Parameter] public int FundId { get; set; }
+
+    private MutualFund? fund;
+    private List<NavCsvRowVm> rows = new();
+    private HashSet<DateTime> existingNavDates = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        fund = await FundRepo.GetByIdAsync(FundId);
+        existingNavDates = await NavRepo.GetExistingNavDatesAsync(FundId);
+    }
+    private NavCsvRowVm ParseLine_old(string line, int rowNo)
+    {
+        var vm = new NavCsvRowVm { RowNo = rowNo };
+
+        var parts = line.Split(',', StringSplitOptions.TrimEntries);
+        if (parts.Length != 2)
+        {
+            vm.Error = "Invalid column count";
+            return vm;
+        }
+
+        if (!DateTime.TryParse(parts[0], out var date))
+        {
+            vm.Error = "Invalid date";
+            return vm;
+        }
+
+        if (date.Date > DateTime.Today)
+        {
+            vm.Error = "Future date not allowed";
+            return vm;
+        }
+
+        if (!decimal.TryParse(parts[1], out var nav) || nav <= 0)
+        {
+            vm.Error = "NAV must be greater than zero";
+            return vm;
+        }
+
+        vm.NavDate = date;
+        vm.NavValue = nav;
+        vm.IsValid = true;
+
+        return vm;
+    }
+    private async Task OnFileSelected_old(InputFileChangeEventArgs e)
+    {
+        rows.Clear();
+
+        using var stream = e.File.OpenReadStream();
+        using var reader = new StreamReader(stream);
+
+        int rowNo = 0;
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync();
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            // Skip header
+            if (rowNo == 0 && line.Contains("NavDate", StringComparison.OrdinalIgnoreCase))
+            {
+                rowNo++;
+                continue;
+            }
+
+            rowNo++;
+
+            var row = ParseLine(line, rowNo);
+            rows.Add(row);
+
+            // 🔴 IMPORTANT SUBTLETY — ADD HERE
+            MarkCsvDuplicateDates();
+        }
+    }
+    
+    private void MarkCsvDuplicateDates()
+    {
+        var duplicates = rows
+            .Where(r => r.IsValid)
+            .GroupBy(r => r.NavDate!.Value.Date)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g);
+
+        foreach (var row in duplicates)
+        {
+            row.IsValid = false;
+            row.Error = "Duplicate date in CSV";
+        }
+    }
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        rows.Clear();
+
+        await using var stream = e.File.OpenReadStream();
+        using var reader = new StreamReader(stream);
+
+        int rowNo = 0;
+
+        while (true)
+        {
+            var line = await reader.ReadLineAsync();
+            if (line == null)
+                break;
+
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            // Skip header
+            if (rowNo == 0 && line.Contains("NavDate", StringComparison.OrdinalIgnoreCase))
+            {
+                rowNo++;
+                continue;
+            }
+
+            rowNo++;
+            rows.Add(ParseLine(line, rowNo));
+        }
+        // 🔴 IMPORTANT SUBTLETY — ADD HERE
+        MarkCsvDuplicateDates();
+    }
+    private NavCsvRowVm ParseLine(string line, int rowNo)
+    {
+        var vm = new NavCsvRowVm { RowNo = rowNo };
+
+        var parts = line.Split(',', StringSplitOptions.TrimEntries);
+        if (parts.Length != 2)
+        {
+            vm.Error = "Invalid column count";
+            return vm;
+        }
+
+        if (!DateTime.TryParse(parts[0], out var date))
+        {
+            vm.Error = "Invalid date";
+            return vm;
+        }
+        vm.NavDate = date;
+
+        if (!decimal.TryParse(parts[1], out var nav) || nav <= 0)
+        {
+            vm.Error = "NAV must be greater than zero";
+            return vm;
+        }
+        vm.NavValue = nav;
+
+        if (date.Date > DateTime.Today)
+        {
+            vm.Error = "Future date not allowed";
+            return vm;
+        }
+
+        if (existingNavDates.Contains(date.Date))
+        {
+            vm.Error = "NAV already exists for this date";
+            return vm;
+        }
+
+        // vm.NavDate = date;
+        // vm.NavValue = nav;
+        vm.IsValid = true;
+
+        return vm;
+    }
+
+
+    private async Task Save()
+    {
+        var navs = rows
+            .Where(r => r.IsValid)
+            .Select(r => new NavHistory
+            {
+                MutualFundId = FundId,
+                NavDate = r.NavDate!.Value,
+                NavValue = r.NavValue!.Value
+            })
+            .ToList();
+
+        await NavRepo.BulkInsertAsync(navs);
+        Navigation.NavigateTo($"/navs/{FundId}");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo($"/navs/{FundId}");
+    }
+}
+
+@if (fund == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="mb-3">
+        <strong>Mutual Fund:</strong> @fund.SchemeName
+    </div>
+
+    <InputFile OnChange="OnFileSelected"
+               accept=".csv"
+               class="form-control mb-3" />
+
+    @if (rows.Any())
+    {
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>NAV</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rows)
+                {
+                    <tr class="@(r.IsValid ? "" : "table-danger")">
+                        <td>@r.RowNo</td>
+                        <td>@r.NavDate?.ToShortDateString()</td>
+                        <td>@r.NavValue</td>
+                        <td>
+                            @if (r.IsValid)
+                            {
+                                <span class="text-success">Valid</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">@r.Error</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary"
+                disabled="@(!rows.Any(r => r.IsValid))"
+                @onclick="Save">
+            Save Valid Rows
+        </button>
+
+        <button class="btn btn-secondary ms-2"
+                @onclick="Cancel">
+            Cancel
+        </button>
+    }
+}

@@ -26,7 +26,8 @@
 
 @code {
     [Parameter] public int FundId { get; set; }   // this comes from URL
-
+    private string? error;
+    private string? loadError;
     private NavHistory nav = new();
 
     protected override void OnInitialized()
@@ -37,11 +38,27 @@
 
     private async Task HandleSubmit()
     {
-        await NavRepo.AddAsync(nav);
+        try
+        {
+            await NavRepo.AddAsync(nav);
 
-        // 🚀 This is the KEY:
-        // Navigate back to NavList with fund ID in URL
-        Navigation.NavigateTo($"/navs/{FundId}");
+            // 🚀 This is the KEY:
+            // Navigate back to NavList with fund ID in URL
+            Navigation.NavigateTo($"/navs/{FundId}");
+        }
+        catch (Exception ex)
+        {
+            //error = ex.Message;
+            // Check if it's a unique constraint violation (SQLite error code 19)
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                error = "Duplicate data - NAV Value already registered on this date.";
+            }
+            else
+            {
+                error = "An unexpected error occurred while saving.";
+            }
+        }
     }
 
     private void Back()
@@ -65,7 +82,10 @@
         <InputNumber class="form-control" @bind-Value="nav.NavValue" />
         <ValidationMessage For="@(() => nav.NavValue)" />
     </div>
-
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
     <button class="btn btn-primary">Save</button>
     <button type="button" class="btn btn-secondary ms-2" @onclick="Back">Cancel</button>
 </EditForm>

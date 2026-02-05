@@ -27,6 +27,7 @@ namespace OM.MFPTracker.Web
 			builder.Services.AddScoped<IMFCategoryRepo, MFCategoryRepo>();
 			builder.Services.AddScoped<IMutualFundRepo, MutualFundRepo>();
 			builder.Services.AddScoped<INavHistoryRepo, NavHistoryRepo>();
+			builder.Services.AddScoped<ISpecialEventRepo, SpecialEventRepo>();
 			/////////////
 
 			// Add services to the container.

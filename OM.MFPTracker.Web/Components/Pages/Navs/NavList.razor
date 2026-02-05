@@ -92,7 +92,7 @@
 
     private void BulkNav()
     {
-        Navigation.NavigateTo($"/navs/bulk/{selectedFundId}");
+        Navigation.NavigateTo($"/navs/bulk-add/{selectedFundId}");
     }
 
     private void EditNav(int navId) => Navigation.NavigateTo($"/navs/edit/{navId}");
@@ -116,17 +116,9 @@
     </div>
 
     <div class="col-md-6 d-flex align-items-end gap-2">
-        <button class="btn btn-primary"
-                disabled="@(!selectedFundId.HasValue)"
-                @onclick="AddNav">
-            Add NAV
-        </button>
-
-        <button class="btn btn-secondary"
-                disabled="@(!selectedFundId.HasValue)"
-                @onclick="BulkNav">
-            Bulk Insert
-        </button>
+        <button class="btn btn-primary" disabled="@(!selectedFundId.HasValue)" @onclick="AddNav">Add NAV</button>
+        <button class="btn btn-warning btn-sm" disabled="@(!selectedFundId.HasValue)" @onclick="BulkNav">Bulk Insert</button>
+        <button class="btn btn-warning btn-sm" disabled="@(!selectedFundId.HasValue)" @onclick="@(() => Navigation.NavigateTo($"/navs/upload/{selectedFundId}"))">Upload NAV (CSV)</button>
     </div>
 </div>
 
