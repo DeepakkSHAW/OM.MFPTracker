@@ -193,6 +193,24 @@ namespace OM.MFPTracker.Data.Migrations
                             MFCategoryId = 1,
                             SchemeCode = "AAC27",
                             SchemeName = "RK MF"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ISIN = "INF879O01027",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 1,
+                            SchemeCode = "122639",
+                            SchemeName = "Parag Parikh Flexi Cap Fund - Direct Plan - Growth"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ISIN = "INF760K01167",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            SchemeCode = "102920",
+                            SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - REGULAR PLAN - GROWTH"
                         });
                 });
 
@@ -393,34 +411,162 @@ namespace OM.MFPTracker.Data.Migrations
                         new
                         {
                             Id = 1,
-                            EventDate = new DateTime(2026, 1, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            EventType = "Elections",
-                            Notes = "No major impact on stock market",
-                            Title = "Election in West Bengal"
+                            EventDate = new DateTime(2023, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "GlobalMacro",
+                            Notes = "High inflation, pressure on Indian equities and rupee due to elevated energy prices",
+                            Title = "Global Energy Crisis & Commodity Price Shock"
                         },
                         new
                         {
                             Id = 2,
-                            EventDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            EventType = "MajorEvent",
-                            Notes = "Market expected to react to budget announcements",
-                            Title = "India Budget Date"
+                            EventDate = new DateTime(2023, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Climate",
+                            Notes = "Concerns over food inflation and rural demand in India",
+                            Title = "El Niño Impact on Global Agriculture"
                         },
                         new
                         {
                             Id = 3,
-                            EventDate = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            EventType = "EarningsRelease",
-                            Notes = "Top 10 index companies releasing Q4 earnings",
-                            Title = "Quarterly Corporate Earnings Release"
+                            EventDate = new DateTime(2023, 1, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Corporate",
+                            Notes = "Sharp selloff in Adani stocks, dragged broader Indian indices",
+                            Title = "Adani Group Short Seller Report Fallout"
                         },
                         new
                         {
                             Id = 4,
-                            EventDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            EventType = "Macroeconomic",
-                            Notes = "Expectations of interest rate decision",
-                            Title = "RBI Policy Meeting"
+                            EventDate = new DateTime(2023, 1, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Regulatory",
+                            Notes = "Structural reform improving liquidity and settlement efficiency",
+                            Title = "India Implements T+1 Settlement"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            EventDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Elections",
+                            Notes = "High volatility in Sensex and Nifty based on election outcome",
+                            Title = "India General Election Results 2024"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            EventDate = new DateTime(2024, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "MarketMilestone",
+                            Notes = "Positive sentiment and global visibility for Indian equities",
+                            Title = "India Becomes World's 4th Largest Stock Market"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            EventDate = new DateTime(2024, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "MonetaryPolicy",
+                            Notes = "Impacted FII flows and emerging market valuations including India",
+                            Title = "US Federal Reserve Rate Outlook Shift"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            EventDate = new DateTime(2024, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Geopolitics",
+                            Notes = "Global risk-off sentiment affecting export-oriented Indian stocks",
+                            Title = "US-China Trade & Tech Tensions Escalate"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            EventDate = new DateTime(2025, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "GlobalMacro",
+                            Notes = "Sharp correction across global equities including Indian markets",
+                            Title = "Global Stock Market Selloff 2025"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            EventDate = new DateTime(2025, 8, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "TradePolicy",
+                            Notes = "Negative impact on rupee and export-focused Indian stocks",
+                            Title = "US Imposes 50% Tariff on Indian Goods"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            EventDate = new DateTime(2025, 6, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Geopolitics",
+                            Notes = "Oil price spike led to inflation concerns in India",
+                            Title = "Middle East Conflict Escalation (Israel–Iran)"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            EventDate = new DateTime(2025, 3, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "GlobalMacro",
+                            Notes = "Spillover risk aversion affecting emerging markets including India",
+                            Title = "Turkey Currency Crisis & EM Selloff"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            EventDate = new DateTime(2025, 5, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Geopolitics",
+                            Notes = "Short-term volatility in Indian indices and defence stocks",
+                            Title = "India-Pakistan Border Tensions (Pahalgam Incident)"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            EventDate = new DateTime(2025, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "MarketCorrection",
+                            Notes = "FII outflows and global risk aversion caused broad market decline",
+                            Title = "Indian Market Correction Early 2025"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            EventDate = new DateTime(2025, 9, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "MonetaryPolicy",
+                            Notes = "Pressure on valuations and capital flows to India",
+                            Title = "US Fed Signals Prolonged Higher Rates"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            EventDate = new DateTime(2025, 8, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "EconomicData",
+                            Notes = "Boosted confidence in Indian equities and domestic sectors",
+                            Title = "India GDP Growth Beats Expectations"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            EventDate = new DateTime(2026, 2, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "TradePolicy",
+                            Notes = "Positive rally in Indian markets and strengthening of rupee",
+                            Title = "India-US Trade Deal Announcement"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            EventDate = new DateTime(2026, 2, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Technology",
+                            Notes = "Valuation reset in IT and tech stocks including Indian IT sector",
+                            Title = "Global AI & Tech Stock Selloff"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            EventDate = new DateTime(2024, 11, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "Geopolitics",
+                            Notes = "Energy and fertilizer price volatility affecting Indian inflation",
+                            Title = "Russia-Ukraine War Commodity Impact"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            EventDate = new DateTime(2024, 7, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EventType = "GlobalMacro",
+                            Notes = "Increased volatility and cautious FII positioning in Indian markets",
+                            Title = "Global Elections & Policy Uncertainty (US/EU)"
                         });
                 });
 

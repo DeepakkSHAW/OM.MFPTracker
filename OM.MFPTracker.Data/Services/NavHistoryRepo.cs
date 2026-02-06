@@ -17,6 +17,7 @@ namespace OM.MFPTracker.Data.Services
 		Task<List<NavHistory>> GetPagedByFundAsync(int mutualFundId, int pageNumber, int pageSize, bool orderByDescending = false);
 		Task<int> GetCountByFundAsync(int mutualFundId);
 		Task<HashSet<DateTime>> GetExistingNavDatesAsync(int mutualFundId);
+		Task<NavImportResult> SaveLatestNavAsync(List<NavToInsert> navs);
 		Task DeleteAsync(int id);
 	}
 	public class NavHistoryRepo : INavHistoryRepo
@@ -83,15 +84,6 @@ namespace OM.MFPTracker.Data.Services
 			await _db.SaveChangesAsync();
 		}
 
-		//public async Task<List<NavHistory>> GetPagedByFundAsync(int mutualFundId, int pageNumber, int pageSize)
-		//{
-		//	return await _db.NavHistories
-		//		.Where(n => n.MutualFundId == mutualFundId)
-		//		.OrderByDescending(n => n.NavDate)
-		//		.Skip((pageNumber - 1) * pageSize)
-		//		.Take(pageSize)
-		//		.ToListAsync();
-		//}
 		public async Task<List<NavHistory>> GetPagedByFundAsync(int fundId, int page, int pageSize, bool orderByDescending = false)
 		{
 			var query = _db.NavHistories.Where(n => n.MutualFundId == fundId);
@@ -116,6 +108,49 @@ namespace OM.MFPTracker.Data.Services
 				.Where(n => n.MutualFundId == mutualFundId)
 				.Select(n => n.NavDate.Date)
 				.ToHashSetAsync();
+		}
+
+		public async Task<NavImportResult> SaveLatestNavAsync(List<NavToInsert> navs)
+		{
+			var result = new NavImportResult();
+
+			// Load all funds once
+			var funds = await _db.MutualFunds.AsNoTracking().ToListAsync();
+			var fundMap = funds.ToDictionary(f => f.SchemeCode, f => f.Id);
+
+			// Filter only known funds
+			var validNavs = navs.Where(n => fundMap.ContainsKey(n.SchemeCode)).ToList();
+
+			// Load existing NAVs for these dates
+			var navDates = validNavs.Select(n => n.NavDate).Distinct().ToList();
+			var fundIds = fundMap.Values.ToList();
+			var existingNavs = await _db.NavHistories
+				.Where(n => fundIds.Contains(n.MutualFundId) && navDates.Contains(n.NavDate))
+				.AsNoTracking()
+				.ToListAsync();
+
+			foreach (var nav in validNavs)
+			{
+				var fundId = fundMap[nav.SchemeCode];
+
+				var exists = existingNavs.Any(n => n.MutualFundId == fundId && n.NavDate == nav.NavDate);
+				if (exists)
+				{
+					result.SkippedDuplicate++;
+					continue;
+				}
+
+				_db.NavHistories.Add(new NavHistory
+				{
+					MutualFundId = fundId,
+					NavDate = nav.NavDate,
+					NavValue = nav.NavValue
+				});
+				result.Inserted++;
+			}
+
+			await _db.SaveChangesAsync();
+			return result;
 		}
 
 		public async Task DeleteAsync(int id)

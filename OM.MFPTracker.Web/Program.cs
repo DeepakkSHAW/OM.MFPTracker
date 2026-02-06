@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using OM.MFPTracker.Data;
 using OM.MFPTracker.Data.Services;
 using OM.MFPTracker.Web.Components;
+using OM.MFPTracker.Web.Options;
+using OM.MFPTracker.Web.Services;
 using System;
 
 namespace OM.MFPTracker.Web
@@ -19,8 +21,11 @@ namespace OM.MFPTracker.Web
             var dbPath = Path.Combine(builder.Environment.ContentRootPath, dbFolder, dbFile);
             Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
-            // Register DbContext
-            builder.Services.AddDbContext<MFPTrackerDbContext>(options => options.UseSqlite($"Data Source={dbPath}"));
+			builder.Services.Configure<AmfiOptions>(builder.Configuration.GetSection(AmfiOptions.SectionName));
+			builder.Services.AddHttpClient<AmfiNavService>();
+
+			// Register DbContext
+			builder.Services.AddDbContext<MFPTrackerDbContext>(options => options.UseSqlite($"Data Source={dbPath}"));
             
             // Register repository
             builder.Services.AddScoped<IPersonRepo, PersonRepo>();

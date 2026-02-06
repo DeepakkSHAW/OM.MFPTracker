@@ -144,17 +144,59 @@ namespace OM.MFPTracker.Data.Models
 	//	EarningsRelease    // Quarterly or annual earnings release of major companies
 	//}
 
+	//public enum EventType
+	//{
+
+	//	[Display(Name = "Major Event")] MajorEvent,			// Low market impact, informational, e.g., holiday announcement
+	//	[Display(Name = "Minor Event")] MinorEvent,			// High market impact, e.g., budget, major policy change
+	//	[Display(Name = "Regulatory")] Regulatory,			// Compliance or law-related event, e.g., SEBI circular
+	//	[Display(Name = "Macro Economic")] Macroeconomic, 
+	//	[Display(Name = "Corporate Action")] CorporateAction, // Fund/corporate specific actions, e.g., dividend, split, merger
+	//	[Display(Name = "Elections")] Elections,
+	//	[Display(Name = "Global Event")] GlobalEvent,
+	//	[Display(Name = "Global Macro")] GlobalMacro,
+	//	[Display(Name = "Earnings Release")] EarningsRelease
+	//}
+
+	public enum EventType1
+	{
+		[Display(Name = "Major Event")] MajorEvent,                 // High market impact, e.g. Union Budget, Election results, Rate hikes
+		[Display(Name = "Minor Event")] MinorEvent,                 // Low market impact, informational events, e.g. holidays, minor announcements
+		[Display(Name = "Regulatory")] Regulatory,                  // Laws, compliance, SEBI / RBI circulars, T+1 settlement, tax rule changes
+		[Display(Name = "Macro Economic")] Macroeconomic,           // GDP, inflation (CPI/WPI), IIP, unemployment, PMI data
+		[Display(Name = "Monetary Policy")] MonetaryPolicy,         // RBI / US Fed rate decisions, policy statements, liquidity actions
+		[Display(Name = "Elections")] Elections,                    // Indian or global elections impacting sentiment & volatility
+		[Display(Name = "Corporate Action")] CorporateAction,       // Dividend, bonus, split, merger, buyback, demerger
+		[Display(Name = "Earnings Release")] EarningsRelease,       // Quarterly / annual financial results of companies
+		[Display(Name = "Global Event")] GlobalEvent,               // Wars, pandemics, geopolitical tensions, sanctions, global crises
+		[Display(Name = "Global Macro")] GlobalMacro,               // Global inflation, recession fears, commodity shocks, EM risk-off events
+		[Display(Name = "Trade Policy")] TradePolicy,               // Tariffs, FTAs, import/export bans, India–US/China trade decisions
+		[Display(Name = "Market Milestone")] MarketMilestone,       // Sensex/Nifty record highs, market-cap rankings, structural achievements
+		[Display(Name = "Market Correction")] MarketCorrection,     // Crashes, sharp drawdowns, panic sell-offs, volatility spikes
+		[Display(Name = "Technology")] Technology,                  // AI disruptions, IT sector shifts, tech-led rallies or sell-offs
+		[Display(Name = "Climate Event")] ClimateEvent              // El Niño, floods, droughts impacting agriculture, inflation & rural demand
+	}
 	public enum EventType
 	{
-
-		[Display(Name = "Major Event")] MajorEvent,			// Low market impact, informational, e.g., holiday announcement
-		[Display(Name = "Minor Event")] MinorEvent,			// High market impact, e.g., budget, major policy change
-		[Display(Name = "Regulatory")] Regulatory,			// Compliance or law-related event, e.g., SEBI circular
-		[Display(Name = "Macro Economic")] Macroeconomic, 
-		[Display(Name = "Corporate Action")] CorporateAction, // Fund/corporate specific actions, e.g., dividend, split, merger
-		[Display(Name = "Elections")] Elections,
-		[Display(Name = "Global Event")] GlobalEvent,
-		[Display(Name = "Earnings Release")] EarningsRelease
+		[Display(Name = "Major Event")] MajorEvent,				// High market impact, e.g., Budget, RBI policy, Election results
+		[Display(Name = "Minor Event")] MinorEvent,             // Low market impact, informational, e.g., holiday announcement
+		[Display(Name = "Regulatory")] Regulatory,				// Compliance or law-related events, e.g., SEBI/RBI circulars, T+1 settlement
+		[Display(Name = "Macro Economic")] Macroeconomic,       // Domestic macro indicators: GDP, inflation (CPI/WPI), IIP, PMI, employment
+		[Display(Name = "Monetary Policy")] MonetaryPolicy,     // RBI/Fed/ECB rate decisions, policy statements, liquidity measures
+		[Display(Name = "Elections")] Elections,				// Indian or global elections impacting market sentiment & volatility
+		[Display(Name = "Corporate Action")] CorporateAction,   // Dividends, splits, mergers, buybacks, corporate restructurings
+		[Display(Name = "Earnings Release")] EarningsRelease,   // Quarterly/annual financial results of companies
+		[Display(Name = "Global Event")] GlobalEvent,           // Major world events not directly economic, e.g., pandemics, global crises
+		[Display(Name = "Global Macro")] GlobalMacro,           // Global economic shocks, commodity shocks, EM risk-off, inflation, recession fears
+		[Display(Name = "Trade Policy")] TradePolicy,           // Tariffs, free trade agreements, import/export bans, India–US/China trade events
+		[Display(Name = "Market Milestone")] MarketMilestone,   // Sensex/Nifty record highs, market-cap milestones, structural reforms
+		[Display(Name = "Market Correction")] MarketCorrection, // Crashes, sharp drawdowns, volatility spikes
+		[Display(Name = "Technology")] Technology,				// AI disruptions, IT sector shocks, tech-led rallies or sell-offs
+		[Display(Name = "Climate Event")] ClimateEvent,         // El Niño, floods, droughts, agricultural shocks affecting prices
+		[Display(Name = "Geopolitics")] Geopolitics,			// Wars, border tensions, regional conflicts affecting risk sentiment
+		[Display(Name = "Economic Data")] EconomicData,         // Key data releases like GDP, trade balance, fiscal deficit, industrial production
+		[Display(Name = "Corporate")] Corporate,				// Major corporate events not captured by earnings/dividends, e.g., debt crisis, default, large M&A
+		[Display(Name = "Climate")] Climate						// Short-term climate/energy shocks (hurricanes, floods, droughts) affecting markets
 	}
 
 	public class SpecialEvent

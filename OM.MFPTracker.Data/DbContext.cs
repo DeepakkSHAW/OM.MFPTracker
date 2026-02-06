@@ -139,7 +139,9 @@ namespace OM.MFPTracker.Data
 			});
 			modelBuilder.Entity<MutualFund>().HasData(
 				new MutualFund() { Id = 1, ISIN = "123AA", SchemeCode = "B2C67", MFCategoryId = 2, SchemeName = "DK MF" },
-				new MutualFund() { Id = 2, ISIN = "12B4C", SchemeCode = "AAC27", MFCategoryId = 1, SchemeName = "RK MF" }
+				new MutualFund() { Id = 2, ISIN = "12B4C", SchemeCode = "AAC27", MFCategoryId = 1, SchemeName = "RK MF" },
+				new MutualFund() { Id = 3, ISIN = "INF879O01027", SchemeCode = "122639", MFCategoryId = 1, SchemeName = "Parag Parikh Flexi Cap Fund - Direct Plan - Growth" },
+				new MutualFund() { Id = 4, ISIN = "INF760K01167", SchemeCode = "102920", MFCategoryId = 2, SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - REGULAR PLAN - GROWTH" }
 				);
 
 			modelBuilder.Entity<NavHistory>(entity =>
@@ -192,10 +194,26 @@ namespace OM.MFPTracker.Data
 				entity.HasIndex(e => e.EventDate);
 				// Seed sample data
 				entity.HasData(
-					new SpecialEvent { Id = 1, EventDate = new DateTime(2026, 1, 9), Title = "Election in West Bengal", EventType = EventType.Elections, Notes = "No major impact on stock market" },
-					new SpecialEvent { Id = 2, EventDate = new DateTime(2026, 2, 1), Title = "India Budget Date", EventType = EventType.MajorEvent, Notes = "Market expected to react to budget announcements" },
-					new SpecialEvent { Id = 3, EventDate = new DateTime(2026, 3, 15), Title = "Quarterly Corporate Earnings Release", EventType = EventType.EarningsRelease, Notes = "Top 10 index companies releasing Q4 earnings" },
-					new SpecialEvent { Id = 4, EventDate = new DateTime(2026, 4, 1), Title = "RBI Policy Meeting", EventType = EventType.Macroeconomic, Notes = "Expectations of interest rate decision" }
+					new SpecialEvent { Id = 1, EventDate = new DateTime(2023, 1, 10), Title = "Global Energy Crisis & Commodity Price Shock", EventType = EventType.GlobalMacro, Notes = "High inflation, pressure on Indian equities and rupee due to elevated energy prices" },
+					new SpecialEvent { Id = 2, EventDate = new DateTime(2023, 6, 15), Title = "El Niño Impact on Global Agriculture", EventType = EventType.Climate, Notes = "Concerns over food inflation and rural demand in India" },
+					new SpecialEvent { Id = 3, EventDate = new DateTime(2023, 1, 25), Title = "Adani Group Short Seller Report Fallout", EventType = EventType.Corporate, Notes = "Sharp selloff in Adani stocks, dragged broader Indian indices" },
+					new SpecialEvent { Id = 4, EventDate = new DateTime(2023, 1, 27), Title = "India Implements T+1 Settlement", EventType = EventType.Regulatory, Notes = "Structural reform improving liquidity and settlement efficiency" },
+					new SpecialEvent { Id = 5, EventDate = new DateTime(2024, 6, 4), Title = "India General Election Results 2024", EventType = EventType.Elections, Notes = "High volatility in Sensex and Nifty based on election outcome" },
+					new SpecialEvent { Id = 6, EventDate = new DateTime(2024, 12, 26), Title = "India Becomes World's 4th Largest Stock Market", EventType = EventType.MarketMilestone, Notes = "Positive sentiment and global visibility for Indian equities" },
+					new SpecialEvent { Id = 7, EventDate = new DateTime(2024, 3, 20), Title = "US Federal Reserve Rate Outlook Shift", EventType = EventType.MonetaryPolicy, Notes = "Impacted FII flows and emerging market valuations including India" },
+					new SpecialEvent { Id = 8, EventDate = new DateTime(2024, 5, 10), Title = "US-China Trade & Tech Tensions Escalate", EventType = EventType.Geopolitics, Notes = "Global risk-off sentiment affecting export-oriented Indian stocks" },
+					new SpecialEvent { Id = 9, EventDate = new DateTime(2025, 4, 3), Title = "Global Stock Market Selloff 2025", EventType = EventType.GlobalMacro, Notes = "Sharp correction across global equities including Indian markets" },
+					new SpecialEvent { Id = 10, EventDate = new DateTime(2025, 8, 27), Title = "US Imposes 50% Tariff on Indian Goods", EventType = EventType.TradePolicy, Notes = "Negative impact on rupee and export-focused Indian stocks" },
+					new SpecialEvent { Id = 11, EventDate = new DateTime(2025, 6, 13), Title = "Middle East Conflict Escalation (Israel–Iran)", EventType = EventType.Geopolitics, Notes = "Oil price spike led to inflation concerns in India" },
+					new SpecialEvent { Id = 12, EventDate = new DateTime(2025, 3, 22), Title = "Turkey Currency Crisis & EM Selloff", EventType = EventType.GlobalMacro, Notes = "Spillover risk aversion affecting emerging markets including India" },
+					new SpecialEvent { Id = 13, EventDate = new DateTime(2025, 5, 7), Title = "India-Pakistan Border Tensions (Pahalgam Incident)", EventType = EventType.Geopolitics, Notes = "Short-term volatility in Indian indices and defence stocks" },
+					new SpecialEvent { Id = 14, EventDate = new DateTime(2025, 2, 15), Title = "Indian Market Correction Early 2025", EventType = EventType.MarketCorrection, Notes = "FII outflows and global risk aversion caused broad market decline" },
+					new SpecialEvent { Id = 15, EventDate = new DateTime(2025, 9, 20), Title = "US Fed Signals Prolonged Higher Rates", EventType = EventType.MonetaryPolicy, Notes = "Pressure on valuations and capital flows to India" },
+					new SpecialEvent { Id = 16, EventDate = new DateTime(2025, 8, 30), Title = "India GDP Growth Beats Expectations", EventType = EventType.EconomicData, Notes = "Boosted confidence in Indian equities and domestic sectors" },
+					new SpecialEvent { Id = 17, EventDate = new DateTime(2026, 2, 3), Title = "India-US Trade Deal Announcement", EventType = EventType.TradePolicy, Notes = "Positive rally in Indian markets and strengthening of rupee" },
+					new SpecialEvent { Id = 18, EventDate = new DateTime(2026, 2, 4), Title = "Global AI & Tech Stock Selloff", EventType = EventType.Technology, Notes = "Valuation reset in IT and tech stocks including Indian IT sector" },
+					new SpecialEvent { Id = 19, EventDate = new DateTime(2024, 11, 15), Title = "Russia-Ukraine War Commodity Impact", EventType = EventType.Geopolitics, Notes = "Energy and fertilizer price volatility affecting Indian inflation" },
+					new SpecialEvent { Id = 20, EventDate = new DateTime(2024, 7, 15), Title = "Global Elections & Policy Uncertainty (US/EU)", EventType = EventType.GlobalMacro, Notes = "Increased volatility and cautious FII positioning in Indian markets" }
 				);
 			});
 

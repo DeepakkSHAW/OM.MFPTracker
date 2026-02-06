@@ -1,0 +1,39 @@
+﻿@page "/navs/navimport"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@using OM.MFPTracker.Web.Services
+@inject AmfiNavService AmfiService
+@inject INavHistoryRepo NavRepo
+<h3>NavImport</h3>
+
+<button class="btn btn-primary" @onclick="ImportNavs">
+    Import Latest NAV from AMFI
+</button>
+
+@if (!string.IsNullOrEmpty(status))
+{
+    <div class="alert alert-info mt-2">@status</div>
+}
+
+@code {
+    string? status;
+
+    async Task ImportNavs()
+    {
+        status = "Downloading NAV data...";
+        var amfiNavs = await AmfiService.GetLatestNavAsync();
+        var count = amfiNavs.Count();
+        status = $"{count} NAV records imported successfully.";
+        // Map to DTO for Data project
+        var navsToInsert = amfiNavs.Select(a => new NavToInsert
+        {
+            SchemeCode = a.SchemeCode,
+            NavValue = a.NavValue,
+            NavDate = a.NavDate
+        }).ToList();
+
+        // Call Data project repo
+        var result = await NavRepo.SaveLatestNavAsync(navsToInsert);
+        status = $"Total {count} NAV records downloaded. Data Inserted: {result.Inserted}, Duplicates Skipped: {result.SkippedDuplicate} also skipped Uknown fund: {result.SkippedUnknownFund}";
+    }
+}
