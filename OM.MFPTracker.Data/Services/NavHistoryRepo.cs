@@ -8,6 +8,7 @@ namespace OM.MFPTracker.Data.Services
 {
 	public interface INavHistoryRepo
 	{
+		Task<string> GetDBCurrentTime();
 		Task<List<NavHistory>> GetByFundAsync(int mutualFundId);
 		Task<NavHistory?> GetAsync(int mutualFundId, DateTime navDate);
 		Task<NavHistory?> GetByIdAsync(int id);
@@ -19,6 +20,7 @@ namespace OM.MFPTracker.Data.Services
 		Task<HashSet<DateTime>> GetExistingNavDatesAsync(int mutualFundId);
 		Task<NavImportResult> SaveLatestNavAsync(List<NavToInsert> navs);
 		Task DeleteAsync(int id);
+		Task<bool> CanAddNavAsync(int fundId);
 	}
 	public class NavHistoryRepo : INavHistoryRepo
 	{
@@ -29,6 +31,16 @@ namespace OM.MFPTracker.Data.Services
 			_db = db;
 		}
 
+		public async Task<string> GetDBCurrentTime()
+		{
+			return _db.Database.SqlQuery<string>($"SELECT STRFTIME('%Y-%m-%d %H:%M:%f', 'now') AS Value").Single();
+		}
+		string GetDBTime()
+		{
+			//return _db.Database.ExecuteSqlRaw("SELECT GETDATE()").ToString();
+			return _db.Database.SqlQuery<string>($"SELECT STRFTIME('%Y-%m-%d %H:%M:%f', 'now') AS Value")
+	.Single();
+		}
 		public async Task<List<NavHistory>> GetByFundAsync(int mutualFundId)
 		{
 			return await _db.NavHistories
@@ -162,6 +174,13 @@ namespace OM.MFPTracker.Data.Services
 			_db.NavHistories.Remove(entity);
 			await _db.SaveChangesAsync();
 		}
-	}
+
+		public async Task<bool> CanAddNavAsync(int fundId)
+		{
+			return await _db.MutualFunds
+				.Where(f => f.Id == fundId)
+				.AnyAsync(f => f.OperationalStatus.IsNavAllowed);
+		}
+    }
 
 }

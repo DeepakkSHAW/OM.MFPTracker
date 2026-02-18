@@ -17,6 +17,100 @@ namespace OM.MFPTracker.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.Amc", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("TAMC", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "HDFC",
+                            Name = "HDFC Asset Management Company"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "ICICI",
+                            Name = "ICICI Prudential Asset Management"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "SBI",
+                            Name = "SBI Funds Management"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Code = "AXIS",
+                            Name = "Axis Asset Management"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Code = "KOTAK",
+                            Name = "Kotak Mahindra Asset Management"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Code = "PPFAS",
+                            Name = "PPFAS Mutual Fund"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Code = "MAMF",
+                            Name = "Mirae Asset Mutual Fund"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Code = "CRAMC",
+                            Name = "CANARA ROBECO Mutual Fund"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Code = "BANDHAN MF",
+                            Name = "BANDHAN Mutual Fund"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Code = "NIMF",
+                            Name = "Nippon India Mutual Fund"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Code = "TMF",
+                            Name = "Tata Asset Management"
+                        });
+                });
+
             modelBuilder.Entity("OM.MFPTracker.Data.Models.Dummy", b =>
                 {
                     b.Property<int>("Id")
@@ -138,6 +232,9 @@ namespace OM.MFPTracker.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AmcId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ISIN")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -150,6 +247,9 @@ namespace OM.MFPTracker.Data.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("MFCategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OperationalStatusId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SchemeCode")
@@ -165,10 +265,14 @@ namespace OM.MFPTracker.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AmcId");
+
                     b.HasIndex("ISIN")
                         .IsUnique();
 
                     b.HasIndex("MFCategoryId");
+
+                    b.HasIndex("OperationalStatusId");
 
                     b.HasIndex("SchemeCode")
                         .IsUnique();
@@ -179,38 +283,222 @@ namespace OM.MFPTracker.Data.Migrations
                         new
                         {
                             Id = 1,
-                            ISIN = "123AA",
+                            AmcId = 4,
+                            ISIN = "INF846K01K35",
                             InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             MFCategoryId = 2,
-                            SchemeCode = "B2C67",
-                            SchemeName = "DK MF"
+                            OperationalStatusId = 1,
+                            SchemeCode = "125354",
+                            SchemeName = "AXIS SMALL CAP Fund - DIRECT PLAN - GROWTH"
                         },
                         new
                         {
                             Id = 2,
-                            ISIN = "12B4C",
+                            AmcId = 9,
+                            ISIN = "INF194KB1AJ8",
                             InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            MFCategoryId = 1,
-                            SchemeCode = "AAC27",
-                            SchemeName = "RK MF"
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "147944",
+                            SchemeName = "BANDHAN SMALL CAP FUND - REGULAR PLAN GROWTH"
                         },
                         new
                         {
                             Id = 3,
-                            ISIN = "INF879O01027",
+                            AmcId = 8,
+                            ISIN = "INF760K01167",
                             InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            MFCategoryId = 1,
-                            SchemeCode = "122639",
-                            SchemeName = "Parag Parikh Flexi Cap Fund - Direct Plan - Growth"
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "102920",
+                            SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - REGULAR PLAN - GROWTH"
                         },
                         new
                         {
                             Id = 4,
-                            ISIN = "INF760K01167",
+                            AmcId = 8,
+                            ISIN = "INF760K01EI4",
                             InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             MFCategoryId = 2,
-                            SchemeCode = "102920",
-                            SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - REGULAR PLAN - GROWTH"
+                            OperationalStatusId = 1,
+                            SchemeCode = "118278",
+                            SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AmcId = 8,
+                            ISIN = "INF760K01JC6",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "146130",
+                            SchemeName = "CANARA ROBECO SMALL CAP FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AmcId = 8,
+                            ISIN = "INF760K01JW4",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "149085",
+                            SchemeName = "CANARA ROBECO VALUE FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AmcId = 5,
+                            ISIN = "INF174K01LS2",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "120166",
+                            SchemeName = "KOTAK FLEXICAP FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AmcId = 5,
+                            ISIN = "INF174K01LF9",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "120158",
+                            SchemeName = "KOTAK LARGE & MIDCAP FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            AmcId = 7,
+                            ISIN = "INF769K01BI1",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "118834",
+                            SchemeName = "MIRAE ASSET LARGE & MIDCAP FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AmcId = 7,
+                            ISIN = "INF769K01HP3",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "149169",
+                            SchemeName = "MIRAE ASSET S&P 500 Top 50 ETF"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            AmcId = 7,
+                            ISIN = "INF769K01HF4",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "148927",
+                            SchemeName = "MIRAE ASSET NYSE FANG + ETF"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            AmcId = 7,
+                            ISIN = "INF769K01DM9",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "135781",
+                            SchemeName = "MIRAE ASSET ELSS Tax Saver FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            AmcId = 10,
+                            ISIN = "INF204K01K15",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "118778",
+                            SchemeName = "NIPPON INDIA SMALL CAP FUND - Direct Plan Growth Plan - Growth Option"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            AmcId = 6,
+                            ISIN = "INF879O01266",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "152468",
+                            SchemeName = "PARAG PARIKH DYNAMIC ASSET ALLOCATION FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            AmcId = 6,
+                            ISIN = "INF879O01027",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 1,
+                            OperationalStatusId = 1,
+                            SchemeCode = "122639",
+                            SchemeName = "PARAG PARIKH FLEXI CAP FUND- DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            AmcId = 3,
+                            ISIN = "INF200K01QX4",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "119598",
+                            SchemeName = "SBI LARGE Cap FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            AmcId = 3,
+                            ISIN = "INF200K01T51",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "125497",
+                            SchemeName = "SBI SMALL Cap FUND - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            AmcId = 11,
+                            ISIN = "INF277K01QO1",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "119251",
+                            SchemeName = "TATA RETIREMENT SAVINGS FUND - PROGRESSIVE Plan - DIRECT PLAN - GROWTH"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            AmcId = 11,
+                            ISIN = "INF277K01PK1",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 1,
+                            SchemeCode = "119287",
+                            SchemeName = "TATA S&P BSE SENSEX Index FUND - DIRECT PLAN"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            AmcId = 11,
+                            ISIN = "x",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MFCategoryId = 2,
+                            OperationalStatusId = 2,
+                            SchemeCode = "0",
+                            SchemeName = "TEST ME FUND - DIRECT PLAN"
                         });
                 });
 
@@ -258,22 +546,75 @@ namespace OM.MFPTracker.Data.Migrations
                             MutualFundId = 1,
                             NavDate = new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NavValue = 126.1000m
+                        });
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.OperationalStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsNavAllowed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsTransactionAllowed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TOperationalStatus", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "ACTIVE",
+                            Description = "Open to new investors with continuous subscriptions and redemption",
+                            IsNavAllowed = true,
+                            IsTransactionAllowed = true
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "CLOSED",
+                            Description = "Units available only during NFO with fixed maturity",
+                            IsNavAllowed = false,
+                            IsTransactionAllowed = false
                         },
                         new
                         {
                             Id = 3,
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            MutualFundId = 2,
-                            NavDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            NavValue = 98.7500m
+                            Code = "SUSPENDED",
+                            Description = "Temporarily halted due to regulatory or market conditions",
+                            IsNavAllowed = false,
+                            IsTransactionAllowed = false
                         },
                         new
                         {
                             Id = 4,
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            MutualFundId = 2,
-                            NavDate = new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            NavValue = 99.2500m
+                            Code = "CLOSED_NEW",
+                            Description = "Not accepting new investments",
+                            IsNavAllowed = false,
+                            IsTransactionAllowed = false
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Code = "LIQUIDATED",
+                            Description = "Fund closed and assets paid out or merged",
+                            IsNavAllowed = false,
+                            IsTransactionAllowed = false
                         });
                 });
 
@@ -572,13 +913,29 @@ namespace OM.MFPTracker.Data.Migrations
 
             modelBuilder.Entity("OM.MFPTracker.Data.Models.MutualFund", b =>
                 {
+                    b.HasOne("OM.MFPTracker.Data.Models.Amc", "Amc")
+                        .WithMany("MutualFunds")
+                        .HasForeignKey("AmcId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("OM.MFPTracker.Data.Models.MFCategory", "MFCategory")
                         .WithMany("MutualFunds")
                         .HasForeignKey("MFCategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OM.MFPTracker.Data.Models.OperationalStatus", "OperationalStatus")
+                        .WithMany()
+                        .HasForeignKey("OperationalStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Amc");
+
                     b.Navigation("MFCategory");
+
+                    b.Navigation("OperationalStatus");
                 });
 
             modelBuilder.Entity("OM.MFPTracker.Data.Models.NavHistory", b =>
@@ -590,6 +947,11 @@ namespace OM.MFPTracker.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("MutualFund");
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.Amc", b =>
+                {
+                    b.Navigation("MutualFunds");
                 });
 
             modelBuilder.Entity("OM.MFPTracker.Data.Models.MFCategory", b =>

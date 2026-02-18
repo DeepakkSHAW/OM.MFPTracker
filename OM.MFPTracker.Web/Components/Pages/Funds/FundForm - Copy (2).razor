@@ -7,7 +7,7 @@
 @code {
     [Parameter] public MutualFund Fund { get; set; } = new();
     private List<MFCategory> categories = [];
-
+    private string? errorMessage; // To store unique constraint errors
 
     protected override async Task OnInitializedAsync()
     {
@@ -17,14 +17,41 @@
 
     private async Task Save()
     {
-        if (Fund.Id == 0)
-            await FundRepo.AddAsync(Fund);
-        else
-            await FundRepo.UpdateAsync(Fund);
+        try
+        {
+            errorMessage = null; // Reset error
+
+            if (Fund.Id == 0)
+                await FundRepo.AddAsync(Fund);
+            else
+                await FundRepo.UpdateAsync(Fund);
 
 
-        NavManager.NavigateTo("/funds");
+            NavManager.NavigateTo("/funds");
+        }
+        catch (Exception ex)
+        {
+            // Check if it's a unique constraint violation (SQLite error code 19)
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                if (ex.InnerException.Message.Contains("SchemeCode"))
+                    errorMessage = "The Scheme Code already exists. Please use a unique code.";
+                else if (ex.InnerException.Message.Contains("ISIN"))
+                    errorMessage = "The ISIN already exists. Please use a unique ISIN.";
+                else
+                    errorMessage = "A fund with these details already exists.";
+            }
+            else
+            {
+                errorMessage = "An unexpected error occurred while saving.";
+            }
+        }
     }
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
 }
 
 <EditForm Model="Fund" OnValidSubmit="Save">

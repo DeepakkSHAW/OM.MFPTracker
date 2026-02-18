@@ -15,6 +15,7 @@ namespace OM.MFPTracker.Data.Models
 		public DateTime InDate { get; set; }
 		public DateTime updateDate { get; set; }
 	}
+	
 	public class Person
 	{
 		[Key]
@@ -38,7 +39,7 @@ namespace OM.MFPTracker.Data.Models
 		public DateTime InDate { get; set; }//only for audit purposes
 		public DateTime UpdateDate { get; set; }//only for audit purposes
 	}
-
+	
 	public class MFCategory
 	{
 		public int Id { get; set; }
@@ -49,12 +50,23 @@ namespace OM.MFPTracker.Data.Models
 		// Navigation
 		public ICollection<MutualFund> MutualFunds { get; set; } = new List<MutualFund>();
 	}
+	public class Amc
+	{
+		[Key]
+		public int Id { get; set; }
 
+		[Required(ErrorMessage = "AMC Name is required")]
+		[StringLength(120, MinimumLength = 2, ErrorMessage = "AMC Name must be between 2 and 120 characters")]
+		public string Name { get; set; } = null!;
+
+		[MaxLength(20)]
+		public string? Code { get; set; }   // Optional: e.g. HDFC, ICICI, SBI
+
+		// Navigation
+		public ICollection<MutualFund> MutualFunds { get; set; } = new List<MutualFund>();
+	}
 	public class MutualFund
 	{
-		//AMC Name
-		//Category
-
 		[Key]
 		public int Id { get; set; }
 		[Required(ErrorMessage = "Scheme Code is Required")]
@@ -69,20 +81,45 @@ namespace OM.MFPTracker.Data.Models
 		[MaxLength(100)]
 		public string SchemeName { get; set; } = null!;
 
-		//public string FundCode { get; set; } = null!;
-		//      public string FundName { get; set; } = null!;
+		public int AmcId { get; set; }
 
-		//      public ICollection<NavHistory> NavHistories { get; set; } = [];
-		// FK
+		// Navigation
+		public Amc Amc { get; set; } = null!;
 		public int MFCategoryId { get; set; }
 
 		// Navigation
 		public MFCategory MFCategory { get; set; } = null!;
 
+		[Range(1, int.MaxValue, ErrorMessage = "Operational Status is required")]
+		public int OperationalStatusId { get; set; }
+		public OperationalStatus OperationalStatus { get; set; } = null!;
+
 		// NAV history
 		public ICollection<NavHistory> NavHistories { get; set; } = new List<NavHistory>();
 
 		public DateTime InDate { get; set; }//only for audit purposes
+	}
+
+	public class OperationalStatus
+	{
+		[Key]
+		public int Id { get; set; }
+
+		[Required(ErrorMessage = "Code  is Required")]
+		[StringLength(50, MinimumLength = 5, ErrorMessage = "Code should be between 5 to 50 characters long")]
+
+		public string Code { get; set; } = null!;
+		// e.g. ACTIVE, CLOSED, SUSPENDED
+
+		//public string Name { get; set; } = null!;
+		//// e.g. Active / Open-ended
+
+		[StringLength(200, MinimumLength = 5, ErrorMessage = "Description should be between 5 to 200 characters long")]
+
+		public string Description { get; set; } = null!;
+
+		public bool IsTransactionAllowed { get; set; }
+		public bool IsNavAllowed { get; set; }
 	}
 
 	//public class Portfolio
@@ -128,54 +165,8 @@ namespace OM.MFPTracker.Data.Models
 		// Audit
 		public DateTime InDate { get; set; }
 	}
+	
 
-
-	///////EVENT Data models///////
-	//public enum EventType
-	//{
-	//	MinorEvent,        // Low market impact, informational, e.g., holiday announcement
-	//	MajorEvent,        // High market impact, e.g., budget, major policy change
-	//	Regulatory,        // Compliance or law-related event, e.g., SEBI circular
-	//	CorporateAction,   // Fund/corporate specific actions, e.g., dividend, split, merger
-	//	Macroeconomic,     // Macro-level economic events, e.g., inflation data, GDP release
-	//	MarketHoliday,     // Stock market / exchange holiday
-	//	Elections,         // Political elections impacting markets
-	//	GlobalEvent,       // Global financial events, e.g., US Fed decision, oil shocks
-	//	EarningsRelease    // Quarterly or annual earnings release of major companies
-	//}
-
-	//public enum EventType
-	//{
-
-	//	[Display(Name = "Major Event")] MajorEvent,			// Low market impact, informational, e.g., holiday announcement
-	//	[Display(Name = "Minor Event")] MinorEvent,			// High market impact, e.g., budget, major policy change
-	//	[Display(Name = "Regulatory")] Regulatory,			// Compliance or law-related event, e.g., SEBI circular
-	//	[Display(Name = "Macro Economic")] Macroeconomic, 
-	//	[Display(Name = "Corporate Action")] CorporateAction, // Fund/corporate specific actions, e.g., dividend, split, merger
-	//	[Display(Name = "Elections")] Elections,
-	//	[Display(Name = "Global Event")] GlobalEvent,
-	//	[Display(Name = "Global Macro")] GlobalMacro,
-	//	[Display(Name = "Earnings Release")] EarningsRelease
-	//}
-
-	public enum EventType1
-	{
-		[Display(Name = "Major Event")] MajorEvent,                 // High market impact, e.g. Union Budget, Election results, Rate hikes
-		[Display(Name = "Minor Event")] MinorEvent,                 // Low market impact, informational events, e.g. holidays, minor announcements
-		[Display(Name = "Regulatory")] Regulatory,                  // Laws, compliance, SEBI / RBI circulars, T+1 settlement, tax rule changes
-		[Display(Name = "Macro Economic")] Macroeconomic,           // GDP, inflation (CPI/WPI), IIP, unemployment, PMI data
-		[Display(Name = "Monetary Policy")] MonetaryPolicy,         // RBI / US Fed rate decisions, policy statements, liquidity actions
-		[Display(Name = "Elections")] Elections,                    // Indian or global elections impacting sentiment & volatility
-		[Display(Name = "Corporate Action")] CorporateAction,       // Dividend, bonus, split, merger, buyback, demerger
-		[Display(Name = "Earnings Release")] EarningsRelease,       // Quarterly / annual financial results of companies
-		[Display(Name = "Global Event")] GlobalEvent,               // Wars, pandemics, geopolitical tensions, sanctions, global crises
-		[Display(Name = "Global Macro")] GlobalMacro,               // Global inflation, recession fears, commodity shocks, EM risk-off events
-		[Display(Name = "Trade Policy")] TradePolicy,               // Tariffs, FTAs, import/export bans, India–US/China trade decisions
-		[Display(Name = "Market Milestone")] MarketMilestone,       // Sensex/Nifty record highs, market-cap rankings, structural achievements
-		[Display(Name = "Market Correction")] MarketCorrection,     // Crashes, sharp drawdowns, panic sell-offs, volatility spikes
-		[Display(Name = "Technology")] Technology,                  // AI disruptions, IT sector shifts, tech-led rallies or sell-offs
-		[Display(Name = "Climate Event")] ClimateEvent              // El Niño, floods, droughts impacting agriculture, inflation & rural demand
-	}
 	public enum EventType
 	{
 		[Display(Name = "Major Event")] MajorEvent,				// High market impact, e.g., Budget, RBI policy, Election results

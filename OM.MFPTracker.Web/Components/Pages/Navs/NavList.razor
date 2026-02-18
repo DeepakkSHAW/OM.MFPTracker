@@ -19,17 +19,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        funds = await FundRepo.GetAllAsync();
+        //funds = await FundRepo.GetAllAsync();
+        funds = await FundRepo.GetAllOrderedAsync();
         // Restore selected fund from route parameter
         if (SelectedFundId.HasValue && funds.Any(f => f.Id == SelectedFundId.Value))
         {
             selectedFundId = SelectedFundId;
             await LoadNavs();
         }
+        var v = NavRepo.GetDBCurrentTime();
     }
 
     private async Task OnFundChanged(ChangeEventArgs e)
     {
+
         pageNumber = 1;
 
         if (int.TryParse(e.Value?.ToString(), out var fundId))
@@ -108,8 +111,11 @@
             <option value="">-- Select Mutual Fund --</option>
             @foreach (var f in funds)
             {
-                <option value="@f.Id" selected="@(f.Id == selectedFundId)">
+@*                 <option value="@f.Id" selected="@(f.Id == selectedFundId)">
                     @f.SchemeName
+                </option> *@
+                <option value="@f.Id">
+                    @f.SchemeName.ToUpper() (@f.SchemeCode.ToUpper())
                 </option>
             }
         </select>

@@ -14,6 +14,7 @@ namespace OM.MFPTracker.Data.Services
 		//* Required for pagination *//
 		Task<int> GetCountAsync();
 		Task<List<SpecialEvent>> GetPagedAsync(int page, int pageSize);
+
 	}
 
 	public class SpecialEventRepo : ISpecialEventRepo
@@ -62,10 +63,10 @@ namespace OM.MFPTracker.Data.Services
 		public async Task<List<SpecialEvent>> GetPagedAsync(int page, int pageSize)
 		{
 			return await _db.SpecialEvents
-				.AsNoTracking()
 				.OrderByDescending(e => e.EventDate)
-				.Skip((page - 1) * pageSize)
-				.Take(pageSize)
+				.Skip((page - 1) * pageSize)   
+				.Take(pageSize)               
+				.AsNoTracking()
 				.ToListAsync();
 		}
 

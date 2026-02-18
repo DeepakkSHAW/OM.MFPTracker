@@ -1,0 +1,122 @@
+﻿@page "/amclanding"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject IAmcRepo Repo
+@inject IJSRuntime JS
+
+
+
+@code {
+    private Amc model = new();
+    private List<Amc> list = new();
+    private bool editing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        list = await Repo.GetAllAsync();
+        model = new Amc();
+        editing = false;
+    }
+    private void Edit(Amc a)
+    {
+        model = new Amc
+        {
+            Id = a.Id,
+            Name = a.Name,
+            Code = a.Code
+        };
+        editing = true;
+    }
+
+    private void Cancel()
+    {
+        model = new Amc();
+        editing = false;
+    }
+
+    private async Task Save()
+    {
+        if (!await Repo.IsUniqueAsync(model.Id, model.Name))
+        {
+            await JS.InvokeVoidAsync("alert", "AMC Name must be unique!");
+            return;
+        }
+
+        if (editing)
+            await Repo.UpdateAsync(model);
+        else
+            await Repo.AddAsync(model);
+
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        if (await Repo.IsUsedAsync(id))
+        {
+            await JS.InvokeVoidAsync("alert", "Cannot delete, already used by Mutual Fund!");
+            return;
+        }
+
+        if (await JS.InvokeAsync<bool>("confirm", "Are you sure to delete?"))
+        {
+            await Repo.DeleteAsync(id);
+            await Load();
+        }
+    }
+}
+<h3>AMC Management</h3>
+
+<div class="card mb-4">
+    <div class="card-header">@((editing ? "Edit AMC" : "Add New AMC"))</div>
+    <div class="card-body">
+        <EditForm Model="model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">AMC Name</label>
+                <InputText class="form-control" @bind-Value="model.Name" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Code (optional)</label>
+                <InputText class="form-control" @bind-Value="model.Code" />
+            </div>
+
+            <button type="submit" class="btn btn-success me-2">@((editing ? "Update" : "Save"))</button>
+            @if (editing)
+            {
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+            }
+        </EditForm>
+    </div>
+</div>
+
+<table class="table table-bordered table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th style="width:120px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in list)
+        {
+            <tr>
+                <td>@a.Name</td>
+                <td>@a.Code</td>
+                <td>
+                    <button class="btn btn-sm btn-warning me-1" @onclick="() => Edit(a)">Edit</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(a.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

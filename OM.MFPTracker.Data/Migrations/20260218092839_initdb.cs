@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OM.MFPTracker.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class addednav : Migration
+    public partial class initdb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,6 +47,20 @@ namespace OM.MFPTracker.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TAMC",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 120, nullable: false, collation: "NOCASE"),
+                    Code = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, collation: "NOCASE")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TAMC", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TMFCategory",
                 columns: table => new
                 {
@@ -57,6 +71,22 @@ namespace OM.MFPTracker.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TMFCategory", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TOperationalStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Code = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    IsTransactionAllowed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsNavAllowed = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TOperationalStatus", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -84,16 +114,30 @@ namespace OM.MFPTracker.Data.Migrations
                     SchemeCode = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, collation: "NOCASE"),
                     ISIN = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, collation: "NOCASE"),
                     SchemeName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    AmcId = table.Column<int>(type: "INTEGER", nullable: false),
                     MFCategoryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OperationalStatusId = table.Column<int>(type: "INTEGER", nullable: false),
                     InDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TMutualFunds", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_TMutualFunds_TAMC_AmcId",
+                        column: x => x.AmcId,
+                        principalTable: "TAMC",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_TMutualFunds_TMFCategory_MFCategoryId",
                         column: x => x.MFCategoryId,
                         principalTable: "TMFCategory",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TMutualFunds_TOperationalStatus_OperationalStatusId",
+                        column: x => x.OperationalStatusId,
+                        principalTable: "TOperationalStatus",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -143,6 +187,24 @@ namespace OM.MFPTracker.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "TAMC",
+                columns: new[] { "Id", "Code", "Name" },
+                values: new object[,]
+                {
+                    { 1, "HDFC", "HDFC Asset Management Company" },
+                    { 2, "ICICI", "ICICI Prudential Asset Management" },
+                    { 3, "SBI", "SBI Funds Management" },
+                    { 4, "AXIS", "Axis Asset Management" },
+                    { 5, "KOTAK", "Kotak Mahindra Asset Management" },
+                    { 6, "PPFAS", "PPFAS Mutual Fund" },
+                    { 7, "MAMF", "Mirae Asset Mutual Fund" },
+                    { 8, "CRAMC", "CANARA ROBECO Mutual Fund" },
+                    { 9, "BANDHAN MF", "BANDHAN Mutual Fund" },
+                    { 10, "NIMF", "Nippon India Mutual Fund" },
+                    { 11, "TMF", "Tata Asset Management" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TMFCategory",
                 columns: new[] { "Id", "CategoryName" },
                 values: new object[,]
@@ -157,6 +219,18 @@ namespace OM.MFPTracker.Data.Migrations
                     { 8, "E-Contra Mutual Funds" },
                     { 9, "E-Sectoral Mutual Funds" },
                     { 10, "E-Value Oriented Mutual Funds" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TOperationalStatus",
+                columns: new[] { "Id", "Code", "Description", "IsNavAllowed", "IsTransactionAllowed" },
+                values: new object[,]
+                {
+                    { 1, "ACTIVE", "Open to new investors with continuous subscriptions and redemption", true, true },
+                    { 2, "CLOSED", "Units available only during NFO with fixed maturity", false, false },
+                    { 3, "SUSPENDED", "Temporarily halted due to regulatory or market conditions", false, false },
+                    { 4, "CLOSED_NEW", "Not accepting new investments", false, false },
+                    { 5, "LIQUIDATED", "Fund closed and assets paid out or merged", false, false }
                 });
 
             migrationBuilder.InsertData(
@@ -188,11 +262,29 @@ namespace OM.MFPTracker.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "TMutualFunds",
-                columns: new[] { "Id", "ISIN", "MFCategoryId", "SchemeCode", "SchemeName" },
+                columns: new[] { "Id", "AmcId", "ISIN", "MFCategoryId", "OperationalStatusId", "SchemeCode", "SchemeName" },
                 values: new object[,]
                 {
-                    { 1, "123AA", 2, "B2C67", "DK MF" },
-                    { 2, "12B4C", 1, "AAC27", "RK MF" }
+                    { 1, 4, "INF846K01K35", 2, 1, "125354", "AXIS SMALL CAP Fund - DIRECT PLAN - GROWTH" },
+                    { 2, 9, "INF194KB1AJ8", 2, 1, "147944", "BANDHAN SMALL CAP FUND - REGULAR PLAN GROWTH" },
+                    { 3, 8, "INF760K01167", 2, 1, "102920", "CANARA ROBECO LARGE AND MID CAP FUND - REGULAR PLAN - GROWTH" },
+                    { 4, 8, "INF760K01EI4", 2, 1, "118278", "CANARA ROBECO LARGE AND MID CAP FUND - DIRECT PLAN - GROWTH" },
+                    { 5, 8, "INF760K01JC6", 2, 1, "146130", "CANARA ROBECO SMALL CAP FUND - DIRECT PLAN - GROWTH" },
+                    { 6, 8, "INF760K01JW4", 2, 1, "149085", "CANARA ROBECO VALUE FUND - DIRECT PLAN - GROWTH" },
+                    { 7, 5, "INF174K01LS2", 2, 1, "120166", "KOTAK FLEXICAP FUND - DIRECT PLAN - GROWTH" },
+                    { 8, 5, "INF174K01LF9", 2, 1, "120158", "KOTAK LARGE & MIDCAP FUND - DIRECT PLAN - GROWTH" },
+                    { 9, 7, "INF769K01BI1", 2, 1, "118834", "MIRAE ASSET LARGE & MIDCAP FUND - DIRECT PLAN - GROWTH" },
+                    { 10, 7, "INF769K01HP3", 2, 1, "149169", "MIRAE ASSET S&P 500 Top 50 ETF" },
+                    { 11, 7, "INF769K01HF4", 2, 1, "148927", "MIRAE ASSET NYSE FANG + ETF" },
+                    { 12, 7, "INF769K01DM9", 2, 1, "135781", "MIRAE ASSET ELSS Tax Saver FUND - DIRECT PLAN - GROWTH" },
+                    { 13, 10, "INF204K01K15", 2, 1, "118778", "NIPPON INDIA SMALL CAP FUND - Direct Plan Growth Plan - Growth Option" },
+                    { 14, 6, "INF879O01266", 2, 1, "152468", "PARAG PARIKH DYNAMIC ASSET ALLOCATION FUND - DIRECT PLAN - GROWTH" },
+                    { 15, 6, "INF879O01027", 1, 1, "122639", "PARAG PARIKH FLEXI CAP FUND- DIRECT PLAN - GROWTH" },
+                    { 16, 3, "INF200K01QX4", 2, 1, "119598", "SBI LARGE Cap FUND - DIRECT PLAN - GROWTH" },
+                    { 17, 3, "INF200K01T51", 2, 1, "125497", "SBI SMALL Cap FUND - DIRECT PLAN - GROWTH" },
+                    { 18, 11, "INF277K01QO1", 2, 1, "119251", "TATA RETIREMENT SAVINGS FUND - PROGRESSIVE Plan - DIRECT PLAN - GROWTH" },
+                    { 19, 11, "INF277K01PK1", 2, 1, "119287", "TATA S&P BSE SENSEX Index FUND - DIRECT PLAN" },
+                    { 20, 11, "x", 2, 2, "0", "TEST ME FUND - DIRECT PLAN" }
                 });
 
             migrationBuilder.InsertData(
@@ -201,16 +293,25 @@ namespace OM.MFPTracker.Data.Migrations
                 values: new object[,]
                 {
                     { 1, 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 125.4321m },
-                    { 2, 1, new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 126.1000m },
-                    { 3, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 98.7500m },
-                    { 4, 2, new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 99.2500m }
+                    { 2, 1, new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 126.1000m }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TAMC_Code",
+                table: "TAMC",
+                column: "Code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TMFCategory_CategoryName",
                 table: "TMFCategory",
                 column: "CategoryName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TMutualFunds_AmcId",
+                table: "TMutualFunds",
+                column: "AmcId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TMutualFunds_ISIN",
@@ -222,6 +323,11 @@ namespace OM.MFPTracker.Data.Migrations
                 name: "IX_TMutualFunds_MFCategoryId",
                 table: "TMutualFunds",
                 column: "MFCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TMutualFunds_OperationalStatusId",
+                table: "TMutualFunds",
+                column: "OperationalStatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TMutualFunds_SchemeCode",
@@ -260,7 +366,13 @@ namespace OM.MFPTracker.Data.Migrations
                 name: "TMutualFunds");
 
             migrationBuilder.DropTable(
+                name: "TAMC");
+
+            migrationBuilder.DropTable(
                 name: "TMFCategory");
+
+            migrationBuilder.DropTable(
+                name: "TOperationalStatus");
         }
     }
 }

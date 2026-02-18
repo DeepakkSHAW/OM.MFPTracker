@@ -5,6 +5,183 @@
 @inject ISpecialEventRepo Repo
 @inject IJSRuntime JS
 
+@code
+{
+    private List<SpecialEvent> events = new();
+    private SpecialEvent model = new();
+    private bool editing;
+
+    private int CurrentPage = 1;
+    private const int PageSize = 5;
+
+    private int TotalItems;
+    private int TotalPages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // await Load(1);
+        await LoadEventsAsync();
+    }
+
+    private async Task LoadEventsAsync()
+    {
+        TotalItems = await Repo.GetCountAsync();
+
+        TotalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
+
+        events = await Repo.GetPagedAsync(CurrentPage, PageSize);
+    }
+    private async Task ChangePage(int page)
+    {
+        if (page < 1 || page > TotalPages)
+            return;
+
+        CurrentPage = page;
+        await LoadEventsAsync();
+    }
+    // private async Task Load(int page)
+    // {
+    //     Page = page;
+    //     var count = await Repo.GetCountAsync();
+    //     TotalPages = (int)Math.Ceiling((double) count / PageSize);
+
+    //     events = await Repo.GetPagedAsync(Page, PageSize);
+    // }
+
+    private void Edit(SpecialEvent e)
+    {
+        model = new SpecialEvent
+        {
+            Id = e.Id,
+            EventDate = e.EventDate,
+            EventType = e.EventType,
+            Title = e.Title,
+            Notes = e.Notes
+        };
+
+        editing = true;
+    }
+
+    private async Task Save()
+    {
+        if (editing)
+            await Repo.UpdateAsync(model);
+        else
+            await Repo.AddAsync(model);
+
+        Cancel();
+        // await Load(Page);
+        await LoadEventsAsync();
+    }
+
+    private void Cancel()
+    {
+        model = new SpecialEvent { EventDate = DateTime.Today };
+        editing = false;
+    }
+
+    private async Task Delete(int id)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "Delete this event?"))
+            return;
+
+        await Repo.DeleteAsync(id);
+        //await Load(Page);
+        await LoadEventsAsync();
+    }
+
+
+
+    private string GetEventTypeCss(EventType type) => type switch
+    {
+        // 🔴 Extreme / shock events
+        EventType.MajorEvent
+        or EventType.Geopolitics
+        or EventType.MarketCorrection
+            => "table-danger",
+
+        // 🟠 High impact / uncertainty driven
+        EventType.Elections
+        or EventType.GlobalEvent
+        or EventType.GlobalMacro
+        or EventType.TradePolicy
+            => "table-warning",
+
+        // 🔵 Macro & policy indicators
+        EventType.Macroeconomic
+        or EventType.EconomicData
+        or EventType.MonetaryPolicy
+            => "table-primary",
+
+        // 🟢 Company-specific events
+        EventType.Corporate
+        or EventType.CorporateAction
+        or EventType.EarningsRelease
+            => "table-success",
+
+        // 🟣 Structural / regulatory / market milestones
+        EventType.Regulatory
+        or EventType.MarketMilestone
+            => "table-info",
+
+        // 🟤 Climate & technology driven themes
+        EventType.Climate
+        or EventType.ClimateEvent
+        or EventType.Technology
+            => "table-secondary",
+
+        // ⚪ Low-impact informational events
+        EventType.MinorEvent
+            => "table-light",
+
+        _ => string.Empty
+    };
+
+    private string GetEventBadgeClass(EventType type)
+    {
+        return type switch
+        {
+            EventType.MajorEvent => "badge bg-danger",
+            EventType.MarketCorrection => "badge bg-dark",
+            EventType.MonetaryPolicy => "badge bg-warning text-dark",
+            EventType.Macroeconomic => "badge bg-primary",
+            EventType.GlobalMacro => "badge bg-primary",
+            EventType.EconomicData => "badge bg-primary",
+
+            EventType.Regulatory => "badge bg-info text-dark",
+            EventType.TradePolicy => "badge bg-info text-dark",
+
+            EventType.Elections => "badge bg-secondary",
+            EventType.Geopolitics => "badge bg-secondary",
+            EventType.GlobalEvent => "badge bg-secondary",
+
+            EventType.CorporateAction => "badge bg-success",
+            EventType.EarningsRelease => "badge bg-success",
+            EventType.Corporate => "badge bg-success",
+
+            EventType.Technology => "badge bg-indigo",   // custom color (see CSS below)
+
+            EventType.MarketMilestone => "badge bg-teal",     // custom
+            EventType.MinorEvent => "badge bg-light text-dark",
+
+            EventType.ClimateEvent => "badge bg-success-subtle text-success",
+            EventType.Climate => "badge bg-success-subtle text-success",
+
+            _ => "badge bg-light text-dark"
+        };
+    }
+
+    private static string GetDisplayName(Enum value)
+    {
+        var field = value.GetType().GetField(value.ToString());
+        var attr = field?
+            .GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+            .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+
+        return attr?.Name ?? value.ToString();
+    }
+}
+
 <h3 class="mb-3">Special Events</h3>
 
 <div class="card mb-4">
@@ -82,7 +259,7 @@
             <tr>
                 <td>@e.EventDate.ToString("dd-MMM-yyyy")</td>
                 <td>
-                    <span class="badge @GetEventTypeCss(e.EventType)">
+                    <span class="@GetEventBadgeClass(e.EventType) rounded-pill">
                         @GetDisplayName(e.EventType)
                     </span>
                 </td>
@@ -107,151 +284,33 @@
 {
     <nav>
         <ul class="pagination pagination-sm">
-            <li class="page-item @(Page == 1 ? "disabled" : "")">
+
+            <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
                 <button class="page-link"
-                        @onclick="() => Load(Page - 1)">
-                    Prev
+                        @onclick="() => ChangePage(CurrentPage - 1)">
+                    Previous
                 </button>
             </li>
 
             @for (int i = 1; i <= TotalPages; i++)
             {
-                <li class="page-item @(i == Page ? "active" : "")">
+                var dkPage = i;
+
+                <li class="page-item @(dkPage == CurrentPage ? "active" : "")">
                     <button class="page-link"
-                            @onclick="() => Load(i)">
-                        @i
+                            @onclick="() => ChangePage(dkPage)">
+                        @dkPage
                     </button>
                 </li>
             }
-
-            <li class="page-item @(Page == TotalPages ? "disabled" : "")">
+            <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
                 <button class="page-link"
-                        @onclick="() => Load(Page + 1)">
+                        @onclick="() => ChangePage(CurrentPage + 1)">
                     Next
                 </button>
             </li>
+
         </ul>
     </nav>
 }
 
-@code
-{
-    private List<SpecialEvent> events = new();
-    private SpecialEvent model = new();
-    private bool editing;
-
-    private int Page = 1;
-    private const int PageSize = 5;
-    private int TotalPages;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await Load(1);
-    }
-
-    private async Task Load(int page)
-    {
-        Page = page;
-        var count = await Repo.GetCountAsync();
-        TotalPages = (int)Math.Ceiling(count / (double)PageSize);
-
-        events = await Repo.GetPagedAsync(Page, PageSize);
-    }
-
-    private void Edit(SpecialEvent e)
-    {
-        model = new SpecialEvent
-        {
-            Id = e.Id,
-            EventDate = e.EventDate,
-            EventType = e.EventType,
-            Title = e.Title,
-            Notes = e.Notes
-        };
-
-        editing = true;
-    }
-
-    private async Task Save()
-    {
-        if (editing)
-            await Repo.UpdateAsync(model);
-        else
-            await Repo.AddAsync(model);
-
-        Cancel();
-        await Load(Page);
-    }
-
-    private void Cancel()
-    {
-        model = new SpecialEvent { EventDate = DateTime.Today };
-        editing = false;
-    }
-
-    private async Task Delete(int id)
-    {
-        if (!await JS.InvokeAsync<bool>("confirm", "Delete this event?"))
-            return;
-
-        await Repo.DeleteAsync(id);
-        await Load(Page);
-    }
-
-
-
-    private string GetEventTypeCss(EventType type) => type switch
-    {
-        // 🔴 Extreme / shock events
-        EventType.MajorEvent
-        or EventType.Geopolitics
-        or EventType.MarketCorrection
-            => "table-danger",
-
-        // 🟠 High impact / uncertainty driven
-        EventType.Elections
-        or EventType.GlobalEvent
-        or EventType.GlobalMacro
-        or EventType.TradePolicy
-            => "table-warning",
-
-        // 🔵 Macro & policy indicators
-        EventType.Macroeconomic
-        or EventType.EconomicData
-        or EventType.MonetaryPolicy
-            => "table-primary",
-
-        // 🟢 Company-specific events
-        EventType.Corporate
-        or EventType.CorporateAction
-        or EventType.EarningsRelease
-            => "table-success",
-
-        // 🟣 Structural / regulatory / market milestones
-        EventType.Regulatory
-        or EventType.MarketMilestone
-            => "table-info",
-
-        // 🟤 Climate & technology driven themes
-        EventType.Climate
-        or EventType.ClimateEvent
-        or EventType.Technology
-            => "table-secondary",
-
-        // ⚪ Low-impact informational events
-        EventType.MinorEvent
-            => "table-light",
-
-        _ => string.Empty
-    };
-
-    private static string GetDisplayName(Enum value)
-    {
-        var field = value.GetType().GetField(value.ToString());
-        var attr = field?
-            .GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
-            .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
-
-        return attr?.Name ?? value.ToString();
-    }
-}

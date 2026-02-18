@@ -36,3 +36,7 @@ https://nsdl.co.in/mutual-fund-popup.htm
 AMC Name
 Category
 Scheme Name
+
+
+Work on the below topic bit later:
+- OperationalStatus: Table shows all fields, NAV/Transaction allowed as Yes/No

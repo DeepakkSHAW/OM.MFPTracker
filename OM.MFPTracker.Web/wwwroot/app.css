@@ -87,3 +87,15 @@ h1:focus {
     font-weight: 500;
     text-decoration: none;
 }
+
+/* Special Events – custom badge colors */
+
+.bg-indigo {
+    background-color: #6610f2;
+    color: #fff;
+}
+
+.bg-teal {
+    background-color: #20c997;
+    color: #fff;
+}
