@@ -26,7 +26,7 @@ namespace OM.MFPTracker.Data.Services
 		{
 			_db = db;
 		}
-		public async Task<List<Amc>> GetAllAsync()
+		public async Task<List<Amc>> GetAllAsync_redundent()
 		{
 			return await _db.Amcs
 				.OrderBy(a => a.Name)
@@ -34,6 +34,20 @@ namespace OM.MFPTracker.Data.Services
 				.ToListAsync();
 		}
 
+		public async Task<List<Amc>> GetAllAsync()
+		{
+			return await _db.Amcs
+				.Select(a => new Amc
+				{
+					Id = a.Id,
+					Name = a.Name,
+					Code = a.Code,
+					FundCount = _db.MutualFunds.Count(f => f.AmcId == a.Id)
+				})
+				.OrderBy(a => a.Name)
+				.AsNoTracking()
+				.ToListAsync();
+		}
 		public async Task<Amc?> GetByIdAsync(int id)
 		{
 			return await _db.Amcs

@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace OM.MFPTracker.Data.Services
 {
-    public interface IPersonRepo
-    {
+    public interface IFolioHolder
+	{
         //Task<List <Person>> GetAllAsync();
-        Task<List<Person>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<Person?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-        Task<Person> AddAsync(Person person, CancellationToken cancellationToken = default);
-        Task UpdateAsync(Person person, CancellationToken cancellationToken = default);
+        Task<List<FolioHolder>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<FolioHolder?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<FolioHolder> AddAsync(FolioHolder person, CancellationToken cancellationToken = default);
+        Task UpdateAsync(FolioHolder person, CancellationToken cancellationToken = default);
         Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 
     }
-    public class PersonRepo : IPersonRepo
-    {
+    public class FolioHolderRepo : IFolioHolder
+	{
         private readonly MFPTrackerDbContext _db;
-        public PersonRepo(MFPTrackerDbContext db)
+        public FolioHolderRepo(MFPTrackerDbContext db)
         {
             _db = db;
         }
@@ -29,40 +29,40 @@ namespace OM.MFPTracker.Data.Services
         //public async Task<List<Person>> GetAllAsync() => await _db.People.ToListAsync();
 
         // READ: All
-        public async Task<List<Person>> GetAllAsync(
+        public async Task<List<FolioHolder>> GetAllAsync(
             CancellationToken cancellationToken = default)
         {
-            return await _db.People
+            return await _db.FolioHolders
                             .AsNoTracking()
                             .ToListAsync(cancellationToken);
         }
 
         // READ: By Id
-        public async Task<Person?> GetByIdAsync(
+        public async Task<FolioHolder?> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
-            return await _db.People
+            return await _db.FolioHolders
                             .AsNoTracking()
                             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
         // CREATE
-        public async Task<Person> AddAsync(
-            Person person,
+        public async Task<FolioHolder> AddAsync(
+            FolioHolder person,
             CancellationToken cancellationToken = default)
         {
-            _db.People.Add(person);
+            _db.FolioHolders.Add(person);
             await _db.SaveChangesAsync(cancellationToken);
             return person;
         }
 
         // UPDATE
         public async Task UpdateAsync(
-            Person person,
+            FolioHolder person,
             CancellationToken cancellationToken = default)
         {
-            _db.People.Update(person);
+            _db.FolioHolders.Update(person);
             await _db.SaveChangesAsync(cancellationToken);
         }
 
@@ -71,13 +71,13 @@ namespace OM.MFPTracker.Data.Services
             int id,
             CancellationToken cancellationToken = default)
         {
-            var person = await _db.People
+            var person = await _db.FolioHolders
                                   .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
             if (person is null)
                 return;
 
-            _db.People.Remove(person);
+            _db.FolioHolders.Remove(person);
             await _db.SaveChangesAsync(cancellationToken);
         }
     }

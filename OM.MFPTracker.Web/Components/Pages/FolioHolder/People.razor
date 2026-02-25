@@ -6,7 +6,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inject NavigationManager Navigation
 
-@inject IPersonRepo PersonRepo
+@inject IFolioHolder FolioHolderRepo
 
 <h3>People</h3>
 <button class="btn btn-success mb-2" 
@@ -14,11 +14,11 @@
     Add Person
 </button>
 @code {
-    private List<Person>? people;
+    private List<FolioHolder>? people;
 
     protected override async Task OnInitializedAsync()
     {
-        people = await PersonRepo.GetAllAsync();
+        people = await FolioHolderRepo.GetAllAsync();
     }
         void GoToAddPerson()
     {

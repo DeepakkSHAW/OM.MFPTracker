@@ -1,16 +1,16 @@
 ﻿@page "/add-person"
 @using OM.MFPTracker.Data.Models
 @using OM.MFPTracker.Data.Services
-@inject IPersonRepo PersonRepo
+@inject IFolioHolder FolioHolderRepo
 @inject NavigationManager Navigation
 
 <h3>Add Person</h3>
 @code {
-    private Person person = new Person { DateOfBirth = DateTime.Now };
+    private FolioHolder person = new FolioHolder { DateOfBirth = DateTime.Now };
 
     private async Task HandleValidSubmit()
     {
-        await PersonRepo.AddAsync(person);
+        await FolioHolderRepo.AddAsync(person);
         Navigation.NavigateTo("/people");
     }
 }

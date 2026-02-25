@@ -2,6 +2,7 @@
 @using OM.MFPTracker.Data.Models
 @using OM.MFPTracker.Data.Services
 @inject IMutualFundRepo FundRepo
+@inject IOperationalStatusRepo StatusRepo
 @inject NavigationManager NavManager
 @inject IJSRuntime JS
 
@@ -17,11 +18,15 @@
     private int? selectedStatusId;
     private bool activeOnly;
 
+    private bool showForm;
+    private int? editingId;
+
     private List<OperationalStatus> statuses = new();
 
     protected override async Task OnInitializedAsync()
     {
         funds = await FundRepo.GetAllOrderedAsync();
+        statuses = await StatusRepo.GetAllOrderedAsync();
         await ApplyFilter();
     }
     // private async Task Delete(int id)
@@ -59,20 +64,33 @@
         funds = await FundRepo.SearchAsync(searchText, selectedStatusId, activeOnly);
         CalculateStats();
     }
+    //popup window handling//
+    private void AddFund()
+    {
+        editingId = null;
+        showForm = true;
+    }
+
+    private void EditFund(int id)
+    {
+        editingId = id;
+        showForm = true;
+    }
+
+    private void CloseForm()
+    {
+        showForm = false;
+    }
+
+    private async Task Reload()
+    {
+        funds = await FundRepo.GetAllOrderedAsync();
+    }
+
 
 }
 
 <h3 class="mb-3">Mutual Fund Management</h3>
-
-<div class="d-flex justify-content-between mb-3">
-    <div class="text-muted">
-        Total Funds: <strong>@funds.Count</strong>
-    </div>
-
-    <NavLink class="btn btn-primary" href="/funds/add">
-        + Add Mutual Fund
-    </NavLink>
-</div>
 
 <div class="row mb-3">
 
@@ -133,7 +151,7 @@
                     <option value="">All</option>
                     @foreach (var s in statuses)
                     {
-                        <option value="@s.Id">@s.Description</option>
+                        <option value="@s.Id">@s.Code</option>
                     }
                 </InputSelect>
             </div>
@@ -146,9 +164,8 @@
             </div>
 
             <div class="col-md-2">
-                <button class="btn btn-primary w-100" @onclick="ApplyFilter">
-                    Apply
-                </button>
+                <button class="btn btn-primary w-100" @onclick="AddFund">+ Add Mutual Fund</button>
+                <button class="btn btn-primary w-100" @onclick="ApplyFilter">  Apply </button>
             </div>
 
         </div>
@@ -162,8 +179,6 @@
             <th>AMC</th>
             <th>Category</th>
             <th>Status</th>
-            <th>NAV</th>
-            <th>Txn</th>
             <th style="width:140px;"></th>
         </tr>
     </thead>
@@ -183,50 +198,39 @@
                         @fund.MFCategory?.CategoryName
                     </span>
                 </td>
-
                 <td>
-                    @if (fund.OperationalStatus?.Code == "ACTIVE")
-                    {
-                        <span class="badge bg-success">
-                            @fund.OperationalStatus.Description
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">
-                            @fund.OperationalStatus?.Description
-                        </span>
-                    }
-                </td>
+                    <div class="fw-semibold">@fund.OperationalStatus?.Code</div>
 
-                <td>
-                    @if (fund.OperationalStatus?.IsNavAllowed == true)
-                    {
-                        <span class="text-success fw-semibold">✔</span>
-                    }
-                    else
-                    {
-                        <span class="text-danger">✖</span>
-                    }
-                </td>
+                    <div class="small text-muted">
+                        @fund.OperationalStatus?.Description
+                    </div>
 
-                <td>
-                    @if (fund.OperationalStatus?.IsTransactionAllowed == true)
-                    {
-                        <span class="text-success fw-semibold">✔</span>
-                    }
-                    else
-                    {
-                        <span class="text-danger">✖</span>
-                    }
+                    <div class="mt-1">
+                        @if (fund.OperationalStatus?.IsTransactionAllowed == true)
+                        {
+                            <span class="badge bg-success me-1">✔ Txn Allowed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary me-1">✖ Txn Blocked</span>
+                        }
+
+                        @if (fund.OperationalStatus?.IsNavAllowed == true)
+                        {
+                            <span class="badge bg-primary">✔ NAV Allowed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">✖ NAV Blocked</span>
+                        }
+                    </div>
                 </td>
 
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-warning me-1"
-                            @onclick="@(() => NavManager.NavigateTo($"/funds/edit/{fund.Id}"))">
+                            @onclick="() => EditFund(fund.Id)">
                         Edit
                     </button>
-
                     <button class="btn btn-sm btn-outline-danger"
                             @onclick="@(() => Delete(fund.Id))">
                         Delete
@@ -236,3 +240,7 @@
         }
     </tbody>
 </table>
+<FundForm Visible="showForm"
+          EditId="editingId"
+          OnClose="CloseForm"
+          OnSaved="Reload" />

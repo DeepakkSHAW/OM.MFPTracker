@@ -21,7 +21,7 @@ namespace ConsoleApp.Test
                     services.AddDbContext<MFPTrackerDbContext>(options =>
                         options.UseSqlite(context.Configuration.GetConnectionString("Sqlite")));
 
-                    services.AddScoped<IPersonRepo, PersonRepo>();
+                    services.AddScoped<IFolioHolder, FolioHolderRepo>();
                 })
                 .Build();
 
@@ -29,7 +29,7 @@ namespace ConsoleApp.Test
 
             using (var scope = host.Services.CreateScope())
             {
-                var repo = scope.ServiceProvider.GetRequiredService<IPersonRepo>();
+                var repo = scope.ServiceProvider.GetRequiredService<IFolioHolder>();
 
                 var db = scope.ServiceProvider.GetRequiredService<MFPTrackerDbContext>();
 
@@ -62,7 +62,7 @@ namespace ConsoleApp.Test
                 }
 
                 // CREATE
-                var person = await repo.AddAsync(new Person
+                var person = await repo.AddAsync(new FolioHolder
                 {
                     FirstName = "John",
                     LastName = "Doe",

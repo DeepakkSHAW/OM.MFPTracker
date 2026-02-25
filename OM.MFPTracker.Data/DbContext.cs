@@ -9,17 +9,15 @@ namespace OM.MFPTracker.Data
 	{
 		public MFPTrackerDbContext(DbContextOptions<MFPTrackerDbContext> options) : base(options) { }
 
-		//public DbSet<Portfolio> Portfolios => Set<Portfolio>();
-		//public DbSet<PortfolioHolding> PortfolioHoldings => Set<PortfolioHolding>();
-
 		public DbSet<MFCategory> MFCategories => Set<MFCategory>();
 		public DbSet<MutualFund> MutualFunds => Set<MutualFund>();
 		public DbSet<OperationalStatus> OperationalStatuses => Set<OperationalStatus>();
 		public DbSet<NavHistory> NavHistories => Set<NavHistory>();
 		public DbSet<SpecialEvent> SpecialEvents => Set<SpecialEvent>();
-		public DbSet<Person> People => Set<Person>();
+		public DbSet<FolioHolder> FolioHolders => Set<FolioHolder>();
 		public DbSet<Amc> Amcs => Set<Amc>();
 		public DbSet<OperationalStatus> operationalStatuses => Set<OperationalStatus>();
+		public DbSet<Folio> Folios => Set<Folio>();
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			//            optionsBuilder
@@ -57,9 +55,9 @@ namespace OM.MFPTracker.Data
 				new Dummy() { Id = 2, FirstName = "RS" }
 				);
 
-			modelBuilder.Entity<Person>(entity =>
+			modelBuilder.Entity<FolioHolder>(entity =>
 			{
-				entity.ToTable("People");
+				entity.ToTable("TFolioHolder");
 
 				entity.HasKey(p => p.Id);                 // Set key for entity
 				entity.Property(p => p.FirstName)
@@ -78,13 +76,13 @@ namespace OM.MFPTracker.Data
 					.HasDefaultValueSql("CURRENT_TIMESTAMP")
 					.ValueGeneratedOnAddOrUpdate();
 			});
-			modelBuilder.Entity<Person>().HasData(
-				new Person() { Id = 1, FirstName = "Rupam", LastName = "Shaw", DateOfBirth = DateTime.Parse("1/1/2002"), Signature = "RS" },
-				new Person() { Id = 2, FirstName = "Deepak", LastName = "Shaw", DateOfBirth = DateTime.Parse("10/12/1981"), Signature = "DK" },
-				new Person() { Id = 3, FirstName = "Jagruti", LastName = "Shaw", DateOfBirth = DateTime.Parse("21/04/1974"), Signature = "JS" },
-				new Person() { Id = 4, FirstName = "Divyam", LastName = "Shaw", DateOfBirth = DateTime.Parse("11/11/2001"), Signature = "DS" },
-				new Person() { Id = 5, FirstName = "Durga Prasad", LastName = "Shaw", Signature = "DP" },
-				new Person() { Id = 6, FirstName = "Radha", LastName = "Shaw", Signature = "RD" }
+			modelBuilder.Entity<FolioHolder>().HasData(
+				new FolioHolder() { Id = 1, FirstName = "Rupam", LastName = "Shaw", DateOfBirth = DateTime.Parse("1/1/2002"), Signature = "RS" },
+				new FolioHolder() { Id = 2, FirstName = "Deepak", LastName = "Shaw", DateOfBirth = DateTime.Parse("10/12/1981"), Signature = "DK" },
+				new FolioHolder() { Id = 3, FirstName = "Jagruti", LastName = "Shaw", DateOfBirth = DateTime.Parse("21/04/1974"), Signature = "JS" },
+				new FolioHolder() { Id = 4, FirstName = "Divyam", LastName = "Shaw", DateOfBirth = DateTime.Parse("11/11/2001"), Signature = "DS" },
+				new FolioHolder() { Id = 5, FirstName = "Durga Prasad", LastName = "Shaw", Signature = "DP" },
+				new FolioHolder() { Id = 6, FirstName = "Radha", LastName = "Shaw", Signature = "RD" }
 				);
 
 			modelBuilder.Entity<MFCategory>(entity =>
@@ -199,7 +197,7 @@ namespace OM.MFPTracker.Data
 				new MutualFund() { Id = 20, ISIN = "x", SchemeCode = "0", MFCategoryId = 2, AmcId = 11, SchemeName = "TEST ME FUND - DIRECT PLAN", OperationalStatusId = 2 }
 				
 				);
-
+			 
 			modelBuilder.Entity<OperationalStatus>(entity =>
 			{
 				entity.ToTable("TOperationalStatus");
@@ -321,8 +319,46 @@ namespace OM.MFPTracker.Data
 				new SpecialEvent { Id = 20, EventDate = new DateTime(2024, 7, 15), Title = "Global Elections & Policy Uncertainty (US/EU)", EventType = EventType.GlobalMacro, Notes = "Increased volatility and cautious FII positioning in Indian markets" }
 			);
 		});
-
-
+			modelBuilder.Entity<Folio>(entity =>
+			{
+				entity.ToTable("TFolio");
+				// Primary key
+				entity.HasKey(e => e.FolioId);
+				// Required properties with max length 30
+				entity.Property(e => e.FolioName).IsRequired().UseCollation("NOCASE").HasMaxLength(30);
+				entity.HasIndex(c => c.FolioName).IsUnique();
+				// Optional description with max length 100
+				entity.Property(e => e.FolioDescription).HasMaxLength(100);
+				// Optional Folio Purpose with max length 50
+				entity.Property(e => e.FolioPurpose).HasMaxLength(50);
+				// Optional AttachedBank with max length 50
+				entity.Property(e => e.AttachedBank).HasMaxLength(50);
+				entity.Property(p => p.InDate).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+				//entity.Property(p => p.UpdateDate).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAddOrUpdate(); //* SQLite does not auto-update column like SQL Server’s GETDATE() with trigger behavior.*//
+				entity.Property(p => p.UpdateDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+				entity.HasData(new Folio
+				{
+					FolioId = 1,
+					FolioName = "HDFC-001",
+					FolioDescription = "Primary Investment Folio",
+					FolioPurpose = "Long term wealth creation",
+					FolioIsActive = true,
+					AttachedBank = "HDFC Bank",
+					AmcId = 1,
+					FolioHolderId = 1
+				},
+				new Folio
+				{
+					FolioId = 2,
+					FolioName = "CANREB-001",
+					FolioDescription = "Canara Rebeko Investment Folio",
+					FolioPurpose = "Long term wealth creation",
+					FolioIsActive = true,
+					AttachedBank = "KOTAK NRE Bank",
+					AmcId = 1,
+					FolioHolderId = 1
+				});
+			});
 			//modelBuilder.Entity<PortfolioHolding>()
 			//    .HasIndex(x => new { x.PortfolioId, x.MutualFundId })
 			//    .IsUnique();

@@ -11,8 +11,8 @@ using OM.MFPTracker.Data;
 namespace OM.MFPTracker.Data.Migrations
 {
     [DbContext(typeof(MFPTrackerDbContext))]
-    [Migration("20260218092839_initdb")]
-    partial class initdb
+    [Migration("20260225000845_AddFolio")]
+    partial class AddFolio
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -154,6 +154,190 @@ namespace OM.MFPTracker.Data.Migrations
                             FirstName = "RS",
                             InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             updateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.Folio", b =>
+                {
+                    b.Property<int>("FolioId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AmcId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AttachedBank")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FolioDescription")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FolioHolderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("FolioIsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FolioName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
+
+                    b.Property<string>("FolioPurpose")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("InDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("FolioId");
+
+                    b.HasIndex("AmcId");
+
+                    b.HasIndex("FolioHolderId");
+
+                    b.HasIndex("FolioName")
+                        .IsUnique();
+
+                    b.ToTable("TFolio", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            FolioId = 1,
+                            AmcId = 1,
+                            AttachedBank = "HDFC Bank",
+                            FolioDescription = "Primary Investment Folio",
+                            FolioHolderId = 1,
+                            FolioIsActive = true,
+                            FolioName = "HDFC-001",
+                            FolioPurpose = "Long term wealth creation",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            FolioId = 2,
+                            AmcId = 1,
+                            AttachedBank = "KOTAK NRE Bank",
+                            FolioDescription = "Canara Rebeko Investment Folio",
+                            FolioHolderId = 1,
+                            FolioIsActive = true,
+                            FolioName = "CANREB-001",
+                            FolioPurpose = "Long term wealth creation",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.FolioHolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("InDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Signature")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TFolioHolder", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DateOfBirth = new DateTime(2002, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Rupam",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastName = "Shaw",
+                            Signature = "RS",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DateOfBirth = new DateTime(1981, 12, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Deepak",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastName = "Shaw",
+                            Signature = "DK",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DateOfBirth = new DateTime(1974, 4, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Jagruti",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastName = "Shaw",
+                            Signature = "JS",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DateOfBirth = new DateTime(2001, 11, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Divyam",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastName = "Shaw",
+                            Signature = "DS",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DateOfBirth = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Durga Prasad",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastName = "Shaw",
+                            Signature = "DP",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DateOfBirth = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Radha",
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastName = "Shaw",
+                            Signature = "RD",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -621,107 +805,6 @@ namespace OM.MFPTracker.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("OM.MFPTracker.Data.Models.Person", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("InDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Signature")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("People", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DateOfBirth = new DateTime(2002, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Rupam",
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastName = "Shaw",
-                            Signature = "RS",
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DateOfBirth = new DateTime(1981, 12, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Deepak",
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastName = "Shaw",
-                            Signature = "DK",
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DateOfBirth = new DateTime(1974, 4, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Jagruti",
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastName = "Shaw",
-                            Signature = "JS",
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DateOfBirth = new DateTime(2001, 11, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Divyam",
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastName = "Shaw",
-                            Signature = "DS",
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DateOfBirth = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Durga Prasad",
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastName = "Shaw",
-                            Signature = "DP",
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 6,
-                            DateOfBirth = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Radha",
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastName = "Shaw",
-                            Signature = "RD",
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
             modelBuilder.Entity("OM.MFPTracker.Data.Models.SpecialEvent", b =>
                 {
                     b.Property<int>("Id")
@@ -914,6 +997,25 @@ namespace OM.MFPTracker.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.Folio", b =>
+                {
+                    b.HasOne("OM.MFPTracker.Data.Models.Amc", "Amc")
+                        .WithMany("Folios")
+                        .HasForeignKey("AmcId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OM.MFPTracker.Data.Models.FolioHolder", "FolioHolder")
+                        .WithMany("Folios")
+                        .HasForeignKey("FolioHolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Amc");
+
+                    b.Navigation("FolioHolder");
+                });
+
             modelBuilder.Entity("OM.MFPTracker.Data.Models.MutualFund", b =>
                 {
                     b.HasOne("OM.MFPTracker.Data.Models.Amc", "Amc")
@@ -954,7 +1056,14 @@ namespace OM.MFPTracker.Data.Migrations
 
             modelBuilder.Entity("OM.MFPTracker.Data.Models.Amc", b =>
                 {
+                    b.Navigation("Folios");
+
                     b.Navigation("MutualFunds");
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.FolioHolder", b =>
+                {
+                    b.Navigation("Folios");
                 });
 
             modelBuilder.Entity("OM.MFPTracker.Data.Models.MFCategory", b =>

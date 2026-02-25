@@ -28,13 +28,14 @@ namespace OM.MFPTracker.Web
 			builder.Services.AddDbContext<MFPTrackerDbContext>(options => options.UseSqlite($"Data Source={dbPath}"));
             
             // Register repository
-            builder.Services.AddScoped<IPersonRepo, PersonRepo>();
+            builder.Services.AddScoped<IFolioHolder, FolioHolderRepo>();
 			builder.Services.AddScoped<IMFCategoryRepo, MFCategoryRepo>();
 			builder.Services.AddScoped<IMutualFundRepo, MutualFundRepo>();
 			builder.Services.AddScoped<INavHistoryRepo, NavHistoryRepo>();
 			builder.Services.AddScoped<ISpecialEventRepo, SpecialEventRepo>();
 			builder.Services.AddScoped<IAmcRepo, AmcRepo>();
 			builder.Services.AddScoped<IOperationalStatusRepo, OperationalStatusRepo>();
+			builder.Services.AddScoped<IFolioRepo, FolioRepo>();
 			/////////////
 
 			// Add services to the container.

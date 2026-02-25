@@ -98,7 +98,7 @@
     </div>
 </div>
 
-<table class="table table-bordered table-sm">
+@* <table class="table table-bordered table-sm">
     <thead class="table-light">
         <tr>
             <th>Name</th>
@@ -115,6 +115,46 @@
                 <td>
                     <button class="btn btn-sm btn-warning me-1" @onclick="() => Edit(a)">Edit</button>
                     <button class="btn btn-sm btn-danger" @onclick="() => Delete(a.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table> *@
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>AMC Name</th>
+            <th class="text-center"># Funds</th>
+            <th style="width:150px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var amc in list)
+        {
+            <tr>
+                <td>
+                    <div class="fw-semibold">@amc.Name</div>
+                    <div class="text-muted small">@amc.Code</div>
+                </td>
+
+                <td class="text-center">
+                    <span class="badge rounded-pill @(amc.FundCount == 0 ? "bg-secondary" : "bg-primary") px-3">
+                        @amc.FundCount
+                    </span>
+                </td>
+
+                <td class="text-end">
+                    <button class="btn btn-sm btn-warning me-2"
+                            @onclick="() => Edit(amc)">
+                        Edit
+                    </button>
+
+                    <button class="btn btn-sm btn-danger"
+                            disabled="@(amc.FundCount > 0)"
+                            @onclick="() => Delete(amc.Id)">
+                        Delete
+                    </button>
                 </td>
             </tr>
         }

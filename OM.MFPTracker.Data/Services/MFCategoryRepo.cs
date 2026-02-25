@@ -13,6 +13,9 @@ namespace OM.MFPTracker.Data.Services
 		Task AddAsync(MFCategory category);
 		Task UpdateAsync(MFCategory category);
 		Task DeleteAsync(int id);
+		// Validation helpers
+		Task<bool> IsUniqueAsync(int id, string name);
+		Task<bool> IsUsedAsync(int id);
 	}
 	public class MFCategoryRepo : IMFCategoryRepo
 	{
@@ -55,6 +58,16 @@ namespace OM.MFPTracker.Data.Services
 
 			_db.MFCategories.Remove(entity);
 			await _db.SaveChangesAsync();
+		}
+		public async Task<bool> IsUniqueAsync(int id, string name)
+		{
+			return !await _db.MFCategories
+							 .AnyAsync(c => c.Id != id && c.CategoryName == name);
+		}
+
+		public async Task<bool> IsUsedAsync(int id)
+		{
+			return await _db.MutualFunds.AnyAsync(f => f.MFCategoryId == id);
 		}
 	}
 }

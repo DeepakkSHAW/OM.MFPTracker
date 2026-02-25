@@ -2,6 +2,8 @@
 using OM.MFPTracker.Data.Helper;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
 namespace OM.MFPTracker.Data.Models
 {
@@ -16,7 +18,7 @@ namespace OM.MFPTracker.Data.Models
 		public DateTime updateDate { get; set; }
 	}
 	
-	public class Person
+	public class FolioHolder
 	{
 		[Key]
 		public int Id { get; set; }          // Primary Key
@@ -38,6 +40,8 @@ namespace OM.MFPTracker.Data.Models
 		public string Signature { get; set; } = null!;
 		public DateTime InDate { get; set; }//only for audit purposes
 		public DateTime UpdateDate { get; set; }//only for audit purposes
+
+		public ICollection<Folio> Folios { get; set; } = new List<Folio>();
 	}
 	
 	public class MFCategory
@@ -64,6 +68,10 @@ namespace OM.MFPTracker.Data.Models
 
 		// Navigation
 		public ICollection<MutualFund> MutualFunds { get; set; } = new List<MutualFund>();
+		public ICollection<Folio> Folios { get; set; } = new List<Folio>();
+
+		[NotMapped]
+		public int FundCount { get; set; }
 	}
 	public class MutualFund
 	{
@@ -208,4 +216,48 @@ namespace OM.MFPTracker.Data.Models
 		public string? Notes { get; set; }
 	}
 
+	public class Folio
+	{
+		[Key]
+		public int FolioId { get; set; }          // Primary Key
+		[Required(ErrorMessage = "Folio Name (Number) is Required")]
+		[MaxLength(30)]
+		public string FolioName { get; set; } = null!;
+
+		[StringLength(100, MinimumLength = 5, ErrorMessage = "Folio Description should be between 100 to 5 characters long")]
+		public string? FolioDescription { get; set; } 
+
+		[MaxLength(50, ErrorMessage = "Folio Purpose shouldn't be more than 50 characters long")]
+		public string? FolioPurpose { get; set; }
+
+		public bool FolioIsActive { get; set; } = true;
+
+		[MaxLength(50, ErrorMessage = "Attached Bank to this Folio shouldn't be more than 50 characters long")]
+		public string? AttachedBank { get; set; }
+
+		// ==========================
+		// 🔹 Foreign Keys
+		// ==========================
+
+		[Required]
+		public int AmcId { get; set; }
+		public Amc Amc { get; set; } = null!;
+
+		[Required]
+		public int FolioHolderId { get; set; }
+		public FolioHolder FolioHolder { get; set; } = null!;
+
+		public DateTime InDate { get; set; }//only for audit purposes
+		public DateTime UpdateDate { get; set; }//only for audit purposes
+
+		// ==========================
+		// 🔹 Navigation Collections
+		// ==========================
+
+		//public ICollection<MFTransaction> Transactions { get; set; }
+		//	= new List<MFTransaction>();
+
+		//AMCID
+		//FolioOwnerId
+	}
 }

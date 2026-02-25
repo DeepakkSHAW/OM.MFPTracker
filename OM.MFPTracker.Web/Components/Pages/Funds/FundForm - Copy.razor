@@ -1,0 +1,145 @@
+﻿@page "/fundsold/add"
+@page "/fundsold/edit/{Id:int}"
+
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+
+@inject IMutualFundRepo FundRepo
+@inject IMFCategoryRepo CategoryRepo
+@inject IAmcRepo AmcRepo
+@inject IOperationalStatusRepo StatusRepo
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@code {
+
+    [Parameter] public int? Id { get; set; }
+
+    private MutualFund model = new();
+
+    private List<MFCategory> categories = new();
+    private List<Amc> amcs = new();
+    private List<OperationalStatus> statuses = new();
+
+    private bool isEdit => Id.HasValue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await CategoryRepo.GetAllAsync();
+        amcs = await AmcRepo.GetAllAsync();
+        statuses = await StatusRepo.GetAllAsync();
+
+        if (isEdit)
+        {
+            var dbFund = await FundRepo.GetByIdAsync(Id!.Value);
+            if (dbFund == null)
+            {
+                Nav.NavigateTo("/funds");
+                return;
+            }
+
+            model = dbFund;
+        }
+        else
+        {
+            model = new MutualFund
+            {
+                InDate = DateTime.Now
+            };
+        }
+    }
+
+    private async Task Save()
+    {
+        if (!await FundRepo.IsUniqueAsync(model.Id, model.SchemeCode, model.ISIN))
+        {
+            await JS.InvokeVoidAsync("alert", "Scheme Code or ISIN already exists.");
+            return;
+        }
+
+        if (isEdit)
+            await FundRepo.UpdateAsync(model);
+        else
+            await FundRepo.AddAsync(model);
+
+        Nav.NavigateTo("/funds");
+    }
+
+}
+
+                <h3>@(isEdit ? "Edit Mutual Fund" : "Add Mutual Fund")</h3>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <EditForm Model="model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="row g-3">
+
+                <!-- AMC -->
+                <div class="col-md-6">
+                    <label class="form-label">AMC</label>
+                    <InputSelect class="form-select" @bind-Value="model.AmcId">
+                        <option value="">Select AMC</option>
+                        @foreach (var a in amcs.OrderBy(a => a.Name))
+                        {
+                            <option value="@a.Id">@a.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <!-- Category -->
+                <div class="col-md-6">
+                    <label class="form-label">Category</label>
+                    <InputSelect class="form-select" @bind-Value="model.MFCategoryId">
+                        <option value="">Select Category</option>
+                        @foreach (var c in categories.OrderBy(c => c.CategoryName))
+                        {
+                            <option value="@c.Id">@c.CategoryName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <!-- Operational Status -->
+                <div class="col-md-6">
+                    <label class="form-label">Operational Status</label>
+                    <InputSelect class="form-select" @bind-Value="model.OperationalStatusId">
+                        <option value="">Select Status</option>
+                        @foreach (var s in statuses.OrderBy(s => s.Code))
+                        {
+                            <option value="@s.Id">@s.Description</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <!-- Scheme Name -->
+                <div class="col-md-12">
+                    <label class="form-label">Scheme Name</label>
+                    <InputText class="form-control" @bind-Value="model.SchemeName" />
+                </div>
+
+                <!-- Scheme Code -->
+                <div class="col-md-6">
+                    <label class="form-label">Scheme Code</label>
+                    <InputText class="form-control" @bind-Value="model.SchemeCode" />
+                </div>
+
+                <!-- ISIN -->
+                <div class="col-md-6">
+                    <label class="form-label">ISIN</label>
+                    <InputText class="form-control" @bind-Value="model.ISIN" />
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-success me-2">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="@(() => Nav.NavigateTo("/funds"))">Cancel</button>
+            </div>
+
+        </EditForm>
+
+    </div>
+</div>
