@@ -239,12 +239,12 @@ namespace OM.MFPTracker.Data.Models
 		// 🔹 Foreign Keys
 		// ==========================
 
-		[Required]
-		public int AmcId { get; set; }
+		[Required(ErrorMessage = "AMC is required.")]
+		public int? AmcId { get; set; }
 		public Amc Amc { get; set; } = null!;
 
-		[Required]
-		public int FolioHolderId { get; set; }
+		[Required(ErrorMessage = "AMC is required.")]
+		public int? FolioHolderId { get; set; }
 		public FolioHolder FolioHolder { get; set; } = null!;
 
 		public DateTime InDate { get; set; }//only for audit purposes

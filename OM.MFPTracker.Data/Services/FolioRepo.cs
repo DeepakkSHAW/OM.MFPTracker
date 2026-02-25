@@ -9,6 +9,8 @@ namespace OM.MFPTracker.Data.Services
 	public interface IFolioRepo
 	{
 		Task<(List<Folio> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+		Task<(List<Folio> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm, string sortColumn, bool sortAscending);
+		Task<bool> ExistsByNameAsync(string name, int? excludeId = null);
 		Task<Folio?> GetByIdAsync(int id);
 		Task AddAsync(Folio folio);
 		Task UpdateAsync(Folio folio);
@@ -22,7 +24,50 @@ namespace OM.MFPTracker.Data.Services
 		{
 			_db = db;
 		}
+		public async Task<(List<Folio> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm, string sortColumn, bool sortAscending)
+		{
+			var query = _db.Folios
+				.Include(f => f.Amc)
+				.Include(f => f.FolioHolder)
+				.AsQueryable();
 
+			// ✅ SAFE SEARCH
+			if (!string.IsNullOrWhiteSpace(searchTerm))
+			{
+				searchTerm = searchTerm.Trim().ToLower();
+
+				query = query.Where(f =>
+					f.FolioName.ToLower().Contains(searchTerm) ||
+					(f.Amc != null && f.Amc.Code.ToLower().Contains(searchTerm)) ||
+					(f.FolioHolder != null && f.FolioHolder.FirstName.ToLower().Contains(searchTerm))
+				);
+			}
+
+			// ✅ SORTING
+			query = sortColumn switch
+			{
+				"Amc" => sortAscending
+					? query.OrderBy(f => f.Amc.Code)
+					: query.OrderByDescending(f => f.Amc.Code),
+
+				"Holder" => sortAscending
+					? query.OrderBy(f => f.FolioHolder.FirstName)
+					: query.OrderByDescending(f => f.FolioHolder.FirstName),
+
+				_ => sortAscending
+					? query.OrderBy(f => f.FolioName)
+					: query.OrderByDescending(f => f.FolioName)
+			};
+
+			var totalCount = await query.CountAsync();
+
+			var items = await query
+				.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
+
+			return (items, totalCount);
+		}
 		public async Task<(List<Folio> Items, int TotalCount)>
 			GetPagedAsync(int pageNumber, int pageSize)
 		{
@@ -40,6 +85,14 @@ namespace OM.MFPTracker.Data.Services
 				.ToListAsync();
 
 			return (items, total);
+		}
+
+		public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null)
+		{
+			return await _db.Folios
+				.AnyAsync(f =>
+					f.FolioName.ToLower() == name.ToLower()
+					&& (!excludeId.HasValue || f.FolioId != excludeId.Value));
 		}
 
 		public async Task<Folio?> GetByIdAsync(int id)
