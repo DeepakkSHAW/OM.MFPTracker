@@ -12,6 +12,7 @@ namespace OM.MFPTracker.Data.Services
 		Task<(List<Folio> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm, string sortColumn, bool sortAscending);
 		Task<bool> ExistsByNameAsync(string name, int? excludeId = null);
 		Task<Folio?> GetByIdAsync(int id);
+		Task<List<Folio>> GetAllAsync();
 		Task AddAsync(Folio folio);
 		Task UpdateAsync(Folio folio);
 		Task DeleteAsync(int id);
@@ -99,7 +100,13 @@ namespace OM.MFPTracker.Data.Services
 		{
 			return await _db.Folios.FindAsync(id);
 		}
-
+		public async Task<List<Folio>> GetAllAsync()
+		{
+			return await _db.Folios
+				.AsNoTracking()
+				.OrderBy(x => x.FolioName)
+				.ToListAsync();
+		}
 		public async Task AddAsync(Folio folio)
 		{
 			if (await _db.Folios.AnyAsync(f => f.FolioName == folio.FolioName))

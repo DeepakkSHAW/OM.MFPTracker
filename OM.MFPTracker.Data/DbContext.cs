@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using OM.MFPTracker.Data.Models;
 using System;
+using System.Transactions;
 
 namespace OM.MFPTracker.Data
 {
@@ -18,6 +19,8 @@ namespace OM.MFPTracker.Data
 		public DbSet<Amc> Amcs => Set<Amc>();
 		public DbSet<OperationalStatus> operationalStatuses => Set<OperationalStatus>();
 		public DbSet<Folio> Folios => Set<Folio>();
+		public DbSet<FundTransaction> FundTransactions => Set<FundTransaction>();
+		public DbSet<MutualFundTransaction> MutualFundTransactions => Set<MutualFundTransaction>();
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			//            optionsBuilder
@@ -39,7 +42,6 @@ namespace OM.MFPTracker.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-
 			modelBuilder.Entity<Dummy>(entity =>
 			{
 				entity.ToTable("DummyTable");
@@ -175,7 +177,7 @@ namespace OM.MFPTracker.Data
 					.OnDelete(DeleteBehavior.Restrict);
 			});
 			modelBuilder.Entity<MutualFund>().HasData(
-				new MutualFund() { Id = 1, ISIN = "INF846K01K35", SchemeCode = "125354", MFCategoryId = 2, AmcId =4, SchemeName = "AXIS SMALL CAP Fund - DIRECT PLAN - GROWTH", OperationalStatusId = 1 },
+				new MutualFund() { Id = 1, ISIN = "INF846K01K35", SchemeCode = "125354", MFCategoryId = 2, AmcId = 4, SchemeName = "AXIS SMALL CAP Fund - DIRECT PLAN - GROWTH", OperationalStatusId = 1 },
 				new MutualFund() { Id = 2, ISIN = "INF194KB1AJ8", SchemeCode = "147944", MFCategoryId = 2, AmcId = 9, SchemeName = "BANDHAN SMALL CAP FUND - REGULAR PLAN GROWTH", OperationalStatusId = 1 },
 				new MutualFund() { Id = 3, ISIN = "INF760K01167", SchemeCode = "102920", MFCategoryId = 2, AmcId = 8, SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - REGULAR PLAN - GROWTH", OperationalStatusId = 1 },
 				new MutualFund() { Id = 4, ISIN = "INF760K01EI4", SchemeCode = "118278", MFCategoryId = 2, AmcId = 8, SchemeName = "CANARA ROBECO LARGE AND MID CAP FUND - DIRECT PLAN - GROWTH", OperationalStatusId = 1 },
@@ -195,9 +197,9 @@ namespace OM.MFPTracker.Data
 				new MutualFund() { Id = 18, ISIN = "INF277K01QO1", SchemeCode = "119251", MFCategoryId = 2, AmcId = 11, SchemeName = "TATA RETIREMENT SAVINGS FUND - PROGRESSIVE Plan - DIRECT PLAN - GROWTH", OperationalStatusId = 1 },
 				new MutualFund() { Id = 19, ISIN = "INF277K01PK1", SchemeCode = "119287", MFCategoryId = 2, AmcId = 11, SchemeName = "TATA S&P BSE SENSEX Index FUND - DIRECT PLAN", OperationalStatusId = 1 },
 				new MutualFund() { Id = 20, ISIN = "x", SchemeCode = "0", MFCategoryId = 2, AmcId = 11, SchemeName = "TEST ME FUND - DIRECT PLAN", OperationalStatusId = 2 }
-				
+
 				);
-			 
+
 			modelBuilder.Entity<OperationalStatus>(entity =>
 			{
 				entity.ToTable("TOperationalStatus");
@@ -359,9 +361,205 @@ namespace OM.MFPTracker.Data
 					FolioHolderId = 1
 				});
 			});
-			//modelBuilder.Entity<PortfolioHolding>()
-			//    .HasIndex(x => new { x.PortfolioId, x.MutualFundId })
-			//    .IsUnique();
+			modelBuilder.Entity<FundTransaction>(entity =>
+			{
+				entity.ToTable("TFundTransaction");
+
+				entity.HasKey(e => e.FundTransactionId);
+
+				entity.HasIndex(e => e.ConsumedBuyTransactionId);
+				entity.HasIndex(e => e.SellGroupId);
+				// Recommended indexes
+				entity.HasIndex(e => e.FolioId);
+				entity.HasIndex(e => e.FundId);
+				entity.HasIndex(e => e.Type);
+				entity.HasIndex(e => e.TransactionDate);
+
+				// Best composite index for portfolio queries
+				entity.HasIndex(e => new { e.FolioId, e.FundId, e.TransactionDate });
+
+				entity.Property(e => e.Type).IsRequired();
+				entity.Property(e => e.TransactionDate).IsRequired();
+				entity.Property(e => e.Units).HasPrecision(18, 6).IsRequired();
+				entity.Property(e => e.Nav).HasPrecision(18, 6).IsRequired();
+				entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
+				entity.Property(e => e.Charges).HasPrecision(18, 4);
+				entity.Property(e => e.Remarks).HasMaxLength(50);
+
+				entity.Property(p => p.InDate).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+				entity.Property(p => p.UpdateDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+				// Relationships
+				entity.HasOne(e => e.Folio)
+					  .WithMany(f => f.Transactions)
+					  .HasForeignKey(e => e.FolioId)
+					  .OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne(e => e.Fund)
+					  .WithMany(f => f.Transactions)
+					  .HasForeignKey(e => e.FundId)
+					  .OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasOne<FundTransaction>() // Self-reference for consumed buy
+					  .WithMany()
+					  .HasForeignKey(e => e.ConsumedBuyTransactionId)
+					  .OnDelete(DeleteBehavior.Restrict);
+				entity.HasData(
+					new FundTransaction
+					{
+						FundTransactionId = 1,
+						Type = TransactionType.Buy,
+						TransactionDate = new DateTime(2024, 1, 5),
+						Units = 100.000000m,
+						UnitsLeft = 60.000000m,         // after a later partial sell
+						Nav = 120.50m,
+						Amount = 12050.00m,             // Units * Nav (before charges)
+						Charges = 10.50m,
+						Remarks = "Initial purchase",
+						SellGroupId = null,
+						ConsumedBuyTransactionId = null,
+						FolioId = 1,                    // HDFC-001
+						FundId = 1                      // AXIS SMALL CAP
+					},
+					new FundTransaction
+					{
+						FundTransactionId = 2,
+						Type = TransactionType.Sell,
+						TransactionDate = new DateTime(2024, 6, 10),
+						Units = 40.000000m,             // part of the 100 bought above
+						UnitsLeft = null,               // only meaningful for BUY lots
+						Nav = 150.75m,
+						Amount = 6030.00m,              // 40 * 150.75
+						Charges = 5.25m,
+						Remarks = "Partial profit booking",
+						SellGroupId = Guid.Parse("3E9F2C0D-5E0A-4F1C-9F8B-9C9B3B7F0A11"),
+						ConsumedBuyTransactionId = 1,   // links to the BUY lot
+						FolioId = 1,
+						FundId = 1
+					},
+					// 🔹 Sample BUY Transaction
+					new FundTransaction
+					{
+						FundTransactionId = 3,
+						Type = TransactionType.Buy,
+						TransactionDate = new DateTime(2023, 1, 15),
+						Units = 100.000000m,
+						UnitsLeft = 60.000000m,   // 40 units already sold
+						Nav = 10.500000m,
+						Amount = 1050.00m,
+						Charges = 1.25m,
+						Remarks = "more mf bought Investment",
+						SellGroupId = null,
+						ConsumedBuyTransactionId = null,
+						FolioId = 2,
+						FundId = 2
+					},
+
+				// 🔹 Sample SELL Transaction (consuming 40 units from above buy)
+				new FundTransaction
+				{
+					FundTransactionId = 4,
+					Type = TransactionType.Sell,
+					TransactionDate = new DateTime(2024, 6, 10),
+					Units = 40.000000m,
+					UnitsLeft = null,
+					Nav = 12.000000m,
+					Amount = 480.00m,
+					Charges = 5.00m,
+					Remarks = "Partial Profit Booking",
+					SellGroupId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+					ConsumedBuyTransactionId = 3,
+					FolioId = 1,
+					FundId = 1
+				});
+			});
+
+			//Flat Data Model as standalone design//
+			modelBuilder.Entity<MutualFundTransaction>(entity =>
+			{
+				entity.ToTable("TMutualFundTransaction");
+				// Primary key
+				entity.HasKey(e => e.Id);
+
+				// Required properties >> Property configuration (complements your DataAnnotations)
+				entity.Property(x => x.Folio).IsRequired().HasMaxLength(30);
+				entity.Property(x => x.FundName).IsRequired().HasMaxLength(100);
+
+				entity.Property(x => x.FundCode).HasMaxLength(20);
+				entity.Property(x => x.FundType).HasMaxLength(50);
+				entity.Property(x => x.Source).HasMaxLength(120);
+				entity.Property(x => x.Note).HasMaxLength(500);
+
+				// Numeric precision
+				// SQLite stores NUMERIC affinity, but EF honors precision for validation & model consistency.
+				// NAV: up to 6 fractional places often useful for NAVs
+				entity.Property(x => x.Units).HasPrecision(18, 6);
+				entity.Property(x => x.NAV).HasPrecision(18, 6);
+
+				// AmountPaid: two decimals is typical, but adjust if your data needs more
+				entity.Property(x => x.AmountPaid).HasPrecision(18, 2);
+
+				// DateTime handling: normalize to UTC once materialized
+				// SQLite has no timezone—this ensures you always read back as UTC.
+				entity.Property(x => x.Date).HasConversion(
+						v => v, // stored as-is
+						v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+
+				entity.Property(x => x.CreatedUtc).HasConversion(
+							v => v,
+							v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+						// For SQLite, set default to CURRENT_TIMESTAMP (UTC in SQLite)
+						.HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+				entity.Property(x => x.UpdatedUtc).HasConversion(
+						v => v,
+						v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+				// Indexes for common query patterns
+				entity.HasIndex(x => x.Date);
+				entity.HasIndex(x => x.Folio);
+				entity.HasIndex(x => new { x.FundName, x.FundCode });
+				entity.HasIndex(x => new { x.Folio, x.FundName, x.Date }); // composite for
+
+				//Data seeding//
+				entity.HasData(
+					new MutualFundTransaction
+					{
+						Id = 1,
+						Folio = "DK001",
+						FundName = "HDFC Small cap",
+						FundCode = "HDF003",
+						Date = new DateTime(2024, 6, 10),
+						FundType = "GR - Multi Cap",
+						Source = "Kotak M Bank",
+						Note = "data seeding",
+						NAV = 12.000000m,
+						Units = 40.000000m,
+						AmountPaid = 12.000000m * 40.000000m
+					},
+								new MutualFundTransaction
+								{
+									Id = 2,
+									Folio = "DK001",
+									FundName = "HDFC Flexi cap",
+									FundCode = "HDF003",
+									Date = new DateTime(2025, 7, 12),
+									FundType = "GR - flexi Cap",
+									Source = "Kotak M Bank",
+									Note = "data seeding",
+									NAV = 2.500000m,
+									Units = 140.000000m,
+									AmountPaid = 2.500000m * 140.000000m
+								}
+				);
+
+			});
+		}
+
+		internal async Task UpdateAsync(object transaction)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

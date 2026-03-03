@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OM.MFPTracker.Data;
 
@@ -10,9 +11,11 @@ using OM.MFPTracker.Data;
 namespace OM.MFPTracker.Data.Migrations
 {
     [DbContext(typeof(MFPTrackerDbContext))]
-    partial class MFPTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226041345_SeedFundTransactionMore")]
+    partial class SeedFundTransactionMore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
@@ -405,12 +408,6 @@ namespace OM.MFPTracker.Data.Migrations
 
                     b.HasIndex("SellGroupId");
 
-                    b.HasIndex("TransactionDate");
-
-                    b.HasIndex("Type");
-
-                    b.HasIndex("FolioId", "FundId", "TransactionDate");
-
                     b.ToTable("TFundTransaction", (string)null);
 
                     b.HasData(
@@ -461,23 +458,6 @@ namespace OM.MFPTracker.Data.Migrations
                             Type = 1,
                             Units = 100.000000m,
                             UnitsLeft = 60.000000m,
-                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            FundTransactionId = 4,
-                            Amount = 480.00m,
-                            Charges = 5.00m,
-                            ConsumedBuyTransactionId = 3,
-                            FolioId = 1,
-                            FundId = 1,
-                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Nav = 12.000000m,
-                            Remarks = "Partial Profit Booking",
-                            SellGroupId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            TransactionDate = new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 2,
-                            Units = 40.000000m,
                             UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
@@ -827,108 +807,6 @@ namespace OM.MFPTracker.Data.Migrations
                             OperationalStatusId = 2,
                             SchemeCode = "0",
                             SchemeName = "TEST ME FUND - DIRECT PLAN"
-                        });
-                });
-
-            modelBuilder.Entity("OM.MFPTracker.Data.Models.MutualFundTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("AmountPaid")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Folio")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FundCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FundName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FundType")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("NAV")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Source")
-                        .HasMaxLength(120)
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Units")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Date");
-
-                    b.HasIndex("Folio");
-
-                    b.HasIndex("FundName", "FundCode");
-
-                    b.HasIndex("Folio", "FundName", "Date");
-
-                    b.ToTable("TMutualFundTransaction", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AmountPaid = 480.000000000000m,
-                            CreatedUtc = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Date = new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Folio = "DK001",
-                            FundCode = "HDF003",
-                            FundName = "HDFC Small cap",
-                            FundType = "GR - Multi Cap",
-                            NAV = 12.000000m,
-                            Note = "data seeding",
-                            Source = "Kotak M Bank",
-                            Units = 40.000000m,
-                            UpdatedUtc = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AmountPaid = 350.000000000000m,
-                            CreatedUtc = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Date = new DateTime(2025, 7, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Folio = "DK001",
-                            FundCode = "HDF003",
-                            FundName = "HDFC Flexi cap",
-                            FundType = "GR - flexi Cap",
-                            NAV = 2.500000m,
-                            Note = "data seeding",
-                            Source = "Kotak M Bank",
-                            Units = 140.000000m,
-                            UpdatedUtc = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 

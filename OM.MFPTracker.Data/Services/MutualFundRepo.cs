@@ -91,6 +91,7 @@ namespace OM.MFPTracker.Data.Services
 		Task<List<MutualFund>> GetAllAsync();
 		Task<List<MutualFund>> GetAllOrderedAsync();
 		Task<MutualFund?> GetByIdAsync(int id);
+		Task<List<MutualFund>> GetByAmcAsync(int amcId);
 		Task AddAsync(MutualFund fund);
 		Task UpdateAsync(MutualFund fund);
 		Task DeleteAsync(int id);
@@ -137,6 +138,13 @@ namespace OM.MFPTracker.Data.Services
 				.Include(f => f.MFCategory)
 				.Include(f => f.OperationalStatus)
 				.FirstOrDefaultAsync(f => f.Id == id);
+		}
+		public async Task<List<MutualFund>> GetByAmcAsync(int amcId)
+		{
+			return await _db.MutualFunds
+				.Where(f => f.AmcId == amcId)
+				.OrderBy(f => f.SchemeName)
+				.ToListAsync();
 		}
 		public async Task AddAsync(MutualFund fund)
 		{

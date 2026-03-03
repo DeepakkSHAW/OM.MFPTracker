@@ -56,3 +56,30 @@ High Risk - High returns
 Medium Risk - Medium returns
 Low Risk - Low returns
 Flexi Cap - Flexi Cap Funds
+
+
+
+
+Trnsecation
+===========
+✔ Multiple funds per folio
+✔ Switch transactions
+✔ Dividends
+✔ Tax reports
+✔ Capital gain FIFO logic (later)
+✔ XIRR calculation
+✔ Portfolio performance
+
+improvements
+=============
+FIFO lot tracking
+
+Capital gains calculation
+
+XIRR engine
+
+NAV price history table
+
+Performance charts
+
+Asset allocation view

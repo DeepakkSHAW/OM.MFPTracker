@@ -11,8 +11,8 @@ using OM.MFPTracker.Data;
 namespace OM.MFPTracker.Data.Migrations
 {
     [DbContext(typeof(MFPTrackerDbContext))]
-    [Migration("20260225000845_AddFolio")]
-    partial class AddFolio
+    [Migration("20260226041500_SeedFundTransactionMoregain")]
+    partial class SeedFundTransactionMoregain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,7 +163,7 @@ namespace OM.MFPTracker.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AmcId")
+                    b.Property<int?>("AmcId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AttachedBank")
@@ -174,7 +174,7 @@ namespace OM.MFPTracker.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("FolioHolderId")
+                    b.Property<int?>("FolioHolderId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("FolioIsActive")
@@ -337,6 +337,144 @@ namespace OM.MFPTracker.Data.Migrations
                             InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Shaw",
                             Signature = "RD",
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.FundTransaction", b =>
+                {
+                    b.Property<int>("FundTransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Charges")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ConsumedBuyTransactionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FolioId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FundId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("InDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<decimal>("Nav")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SellGroupId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Units")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("UnitsLeft")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("FundTransactionId");
+
+                    b.HasIndex("ConsumedBuyTransactionId");
+
+                    b.HasIndex("FolioId");
+
+                    b.HasIndex("FundId");
+
+                    b.HasIndex("SellGroupId");
+
+                    b.ToTable("TFundTransaction", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            FundTransactionId = 1,
+                            Amount = 12050.00m,
+                            Charges = 10.50m,
+                            FolioId = 1,
+                            FundId = 1,
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nav = 120.50m,
+                            Remarks = "Initial purchase",
+                            TransactionDate = new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Type = 1,
+                            Units = 100.000000m,
+                            UnitsLeft = 60.000000m,
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            FundTransactionId = 2,
+                            Amount = 6030.00m,
+                            Charges = 5.25m,
+                            ConsumedBuyTransactionId = 1,
+                            FolioId = 1,
+                            FundId = 1,
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nav = 150.75m,
+                            Remarks = "Partial profit booking",
+                            SellGroupId = new Guid("3e9f2c0d-5e0a-4f1c-9f8b-9c9b3b7f0a11"),
+                            TransactionDate = new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Type = 2,
+                            Units = 40.000000m,
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            FundTransactionId = 3,
+                            Amount = 1050.00m,
+                            Charges = 1.25m,
+                            FolioId = 2,
+                            FundId = 2,
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nav = 10.500000m,
+                            Remarks = "more mf bought Investment",
+                            TransactionDate = new DateTime(2023, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Type = 1,
+                            Units = 100.000000m,
+                            UnitsLeft = 60.000000m,
+                            UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            FundTransactionId = 4,
+                            Amount = 480.00m,
+                            Charges = 5.00m,
+                            ConsumedBuyTransactionId = 3,
+                            FolioId = 1,
+                            FundId = 1,
+                            InDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nav = 12.000000m,
+                            Remarks = "Partial Profit Booking",
+                            SellGroupId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            TransactionDate = new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Type = 2,
+                            Units = 40.000000m,
                             UpdateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
@@ -1001,19 +1139,39 @@ namespace OM.MFPTracker.Data.Migrations
                 {
                     b.HasOne("OM.MFPTracker.Data.Models.Amc", "Amc")
                         .WithMany("Folios")
-                        .HasForeignKey("AmcId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AmcId");
 
                     b.HasOne("OM.MFPTracker.Data.Models.FolioHolder", "FolioHolder")
                         .WithMany("Folios")
-                        .HasForeignKey("FolioHolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FolioHolderId");
 
                     b.Navigation("Amc");
 
                     b.Navigation("FolioHolder");
+                });
+
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.FundTransaction", b =>
+                {
+                    b.HasOne("OM.MFPTracker.Data.Models.FundTransaction", null)
+                        .WithMany()
+                        .HasForeignKey("ConsumedBuyTransactionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OM.MFPTracker.Data.Models.Folio", "Folio")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FolioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OM.MFPTracker.Data.Models.MutualFund", "Fund")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Folio");
+
+                    b.Navigation("Fund");
                 });
 
             modelBuilder.Entity("OM.MFPTracker.Data.Models.MutualFund", b =>
@@ -1061,6 +1219,11 @@ namespace OM.MFPTracker.Data.Migrations
                     b.Navigation("MutualFunds");
                 });
 
+            modelBuilder.Entity("OM.MFPTracker.Data.Models.Folio", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("OM.MFPTracker.Data.Models.FolioHolder", b =>
                 {
                     b.Navigation("Folios");
@@ -1074,6 +1237,8 @@ namespace OM.MFPTracker.Data.Migrations
             modelBuilder.Entity("OM.MFPTracker.Data.Models.MutualFund", b =>
                 {
                     b.Navigation("NavHistories");
+
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

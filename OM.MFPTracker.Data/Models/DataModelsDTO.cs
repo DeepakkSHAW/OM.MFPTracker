@@ -27,4 +27,21 @@ namespace OM.MFPTracker.Data.Models
 		/// </summary>
 		public int SkippedUnknownFund { get; set; }
 	}
+
+	public class BuyTransactionCreateDto
+	{
+		public DateTime TransactionDate { get; set; }
+		public decimal Units { get; set; }
+		public decimal Nav { get; set; }
+		public decimal? Charges { get; set; }
+		public string? Remarks { get; set; }
+
+		public int FolioId { get; set; }
+		public int FundId { get; set; }
+	}
+	public class PagedResult<T>
+	{
+		public List<T> Data { get; set; } = new();
+		public int TotalCount { get; set; }
+	}
 }

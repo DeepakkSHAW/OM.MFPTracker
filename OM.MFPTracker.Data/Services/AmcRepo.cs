@@ -10,7 +10,6 @@ namespace OM.MFPTracker.Data.Services
 	{
 		Task<List<Amc>> GetAllAsync();
 		Task<Amc?> GetByIdAsync(int id);
-
 		Task AddAsync(Amc amc);
 		Task UpdateAsync(Amc amc);
 		Task DeleteAsync(int id);
@@ -53,7 +52,6 @@ namespace OM.MFPTracker.Data.Services
 			return await _db.Amcs
 				.FirstOrDefaultAsync(a => a.Id == id);
 		}
-
 		public async Task AddAsync(Amc amc)
 		{
 			_db.Amcs.Add(amc);

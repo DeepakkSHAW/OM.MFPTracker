@@ -1,0 +1,88 @@
+﻿@page "/mf-transactions"
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject IMFTransactionRepo Repo
+
+<h3>Mutual Fund Transactions</h3>
+
+<button class="btn btn-sm btn-primary" @onclick="AddSample">Add sample</button>
+
+<table class="table table-sm mt-3">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Folio</th>
+            <th>Fund</th>
+            <th class="text-end">Units</th>
+            <th class="text-end">NAV</th>
+            <th class="text-end">Amount Paid</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (_items is null)
+        {
+            <tr><td colspan="7">Loading...</td></tr>
+        }
+        else if (_items.Count == 0)
+        {
+            <tr><td colspan="7">No data</td></tr>
+        }
+        else
+        {
+            @foreach (var x in _items)
+            {
+                <tr>
+                    <td>@x.Date.ToString("dd-MMM-yyyy")</td>
+                    <td>@x.Folio</td>
+                    <td>@x.FundName</td>
+                    <td class="text-end">@x.Units.ToString("N3")</td>
+                    <td class="text-end">@x.NAV.ToString("N6")</td>
+                    <td class="text-end">@x.AmountPaid.ToString("N2")</td>
+                    <td class="text-end">
+                        <button class="btn btn-outline-danger btn-sm" @onclick="() => Delete(x.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<MutualFundTransaction>? _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        var (items, _) = await Repo.GetAsync(take: 100);
+        _items = items.ToList();
+    }
+
+    private async Task AddSample()
+    {
+        var tx = new MutualFundTransaction
+        {
+            Date = DateTime.UtcNow,
+            Folio = "DK001",
+            FundName = "HDFC Small cap",
+            FundCode = "HDF003",
+            FundType = "GR - Multi Cap",
+            Units = 40.000000m,
+            NAV = 12.000000m,
+            Source = "Kotak M Bank",
+            Note = "Added from UI"
+        };
+        await Repo.AddAsync(tx);
+        await Reload();
+    }
+
+    private async Task Delete(int id)
+    {
+        await Repo.DeleteAsync(id);
+        await Reload();
+    }
+}

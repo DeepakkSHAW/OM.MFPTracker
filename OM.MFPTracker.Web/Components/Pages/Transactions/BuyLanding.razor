@@ -1,0 +1,227 @@
+﻿@page "/folios/{FolioId:int}/buy"
+
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+
+@inject ITransactionRepo BuyRepo
+
+@code {
+
+    [Parameter] public int FolioId { get; set; }
+
+    private List<FundTransaction>? transactions;
+    private string? searchText;
+    private int pageNumber = 1;
+    private int pageSize = 10;
+    private int totalPages;
+    private int editId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var result = await BuyRepo.GetPagedAsync(
+            FolioId,
+            searchText,
+            pageNumber,
+            pageSize);
+
+        transactions = result.Data;
+        totalPages = (int)Math.Ceiling(result.TotalCount / (double)pageSize);
+    }
+
+    private async Task PrevPage()
+    {
+        pageNumber--;
+        await LoadData();
+    }
+
+    private async Task NextPage()
+    {
+        pageNumber++;
+        await LoadData();
+    }
+
+    private void StartEdit(int id)
+    {
+        editId = id;
+    }
+
+    private async Task SaveEdit(FundTransaction item)
+    {
+        try
+        {
+            item.Type = TransactionType.Buy;
+            item.FolioId = FolioId;
+            item.UnitsLeft = item.Units;
+            item.Amount = item.Units * item.Nav;
+
+            if (item.FundTransactionId == 0)
+            {
+                await BuyRepo.CreateAsync(item);
+            }
+            else
+            {
+                await BuyRepo.UpdateAsync(item);
+            }
+
+            editId = 0;
+
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async void CancelEdit()
+    {
+        editId = 0;
+        await LoadData();
+    }
+
+    private async Task Delete(FundTransaction item)
+    {
+        try
+        {
+            await BuyRepo.DeleteAsync(item);
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void NewTransaction()
+    {
+        var newItem = new FundTransaction
+        {
+            TransactionDate = DateTime.Today,
+            FolioId = FolioId,
+            Type = TransactionType.Buy
+        };
+
+        transactions!.Insert(0, newItem);
+
+        editId = newItem.FundTransactionId; // still 0 but tied to this row
+    }
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString();
+        pageNumber = 1;
+
+        await LoadData();
+    }
+    private async Task ClearSearch()
+    {
+        searchText = null;
+        pageNumber = 1;
+        await LoadData();
+    }
+}
+
+<h3 class="mb-3">
+    Buy Transactions - Folio @FolioId
+</h3>
+
+<div class="mb-3">
+    <input class="form-control"
+           placeholder="Search remarks..."
+           value="@searchText"
+           @oninput="OnSearchChanged" />
+    <button class="btn btn-outline-secondary" @onclick="ClearSearch">
+        Clear
+    </button>
+</div>
+
+<button class="btn btn-success mb-3" @onclick="NewTransaction">
+    Add Buy
+</button>
+
+@if (transactions == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Units</th>
+                <th>NAV</th>
+                <th>Units Left</th>
+                <th>Amount</th>
+                <th>Remarks</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in transactions)
+            {
+                <tr>
+                    @if (editId == item.FundTransactionId)
+                    {
+                        <td><InputDate @bind-Value="item.TransactionDate" /></td>
+                        <td><InputNumber @bind-Value="item.Units" /></td>
+                        <td><InputNumber @bind-Value="item.Nav" /></td>
+                        <td>@item.UnitsLeft</td>
+                        <td>@item.Amount</td>
+                        <td><InputText @bind-Value="item.Remarks" /></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary"
+                                    @onclick="() => SaveEdit(item)">
+                                Save
+                            </button>
+                            <button class="btn btn-sm btn-secondary"
+                                    @onclick="CancelEdit">
+                                Cancel
+                            </button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@item.TransactionDate.ToShortDateString()</td>
+                        <td>@item.Units.ToString("0.######")</td>
+                        <td>@item.Nav.ToString("0.00")</td>
+                        <td>@item.UnitsLeft</td>
+                        <td>@item.Amount.ToString("0.00")</td>
+                        <td>@item.Remarks</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary"
+                                    @onclick="() => StartEdit(item.FundTransactionId)">
+                                Edit
+                            </button>
+
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => Delete(item)">
+                                Delete
+                            </button>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-3">
+        <button class="btn btn-secondary"
+                disabled="@(pageNumber == 1)"
+                @onclick="PrevPage">
+            Previous
+        </button>
+
+        <span class="mx-3">Page @pageNumber of @totalPages</span>
+
+        <button class="btn btn-secondary"
+                disabled="@(pageNumber == totalPages)"
+                @onclick="NextPage">
+            Next
+        </button>
+    </div>
+}

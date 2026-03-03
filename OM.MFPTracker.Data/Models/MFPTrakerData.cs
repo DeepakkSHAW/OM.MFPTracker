@@ -7,6 +7,36 @@ using System.Text;
 
 namespace OM.MFPTracker.Data.Models
 {
+	public enum TransactionType
+	{
+		Buy = 1,
+		Sell = 2,
+		Dividend = 3,
+		SwitchIn = 4,
+		SwitchOut = 5
+	}
+	public enum EventType
+	{
+		[Display(Name = "Major Event")] MajorEvent,             // High market impact, e.g., Budget, RBI policy, Election results
+		[Display(Name = "Minor Event")] MinorEvent,             // Low market impact, informational, e.g., holiday announcement
+		[Display(Name = "Regulatory")] Regulatory,              // Compliance or law-related events, e.g., SEBI/RBI circulars, T+1 settlement
+		[Display(Name = "Macro Economic")] Macroeconomic,       // Domestic macro indicators: GDP, inflation (CPI/WPI), IIP, PMI, employment
+		[Display(Name = "Monetary Policy")] MonetaryPolicy,     // RBI/Fed/ECB rate decisions, policy statements, liquidity measures
+		[Display(Name = "Elections")] Elections,                // Indian or global elections impacting market sentiment & volatility
+		[Display(Name = "Corporate Action")] CorporateAction,   // Dividends, splits, mergers, buybacks, corporate restructurings
+		[Display(Name = "Earnings Release")] EarningsRelease,   // Quarterly/annual financial results of companies
+		[Display(Name = "Global Event")] GlobalEvent,           // Major world events not directly economic, e.g., pandemics, global crises
+		[Display(Name = "Global Macro")] GlobalMacro,           // Global economic shocks, commodity shocks, EM risk-off, inflation, recession fears
+		[Display(Name = "Trade Policy")] TradePolicy,           // Tariffs, free trade agreements, import/export bans, India–US/China trade events
+		[Display(Name = "Market Milestone")] MarketMilestone,   // Sensex/Nifty record highs, market-cap milestones, structural reforms
+		[Display(Name = "Market Correction")] MarketCorrection, // Crashes, sharp drawdowns, volatility spikes
+		[Display(Name = "Technology")] Technology,              // AI disruptions, IT sector shocks, tech-led rallies or sell-offs
+		[Display(Name = "Climate Event")] ClimateEvent,         // El Niño, floods, droughts, agricultural shocks affecting prices
+		[Display(Name = "Geopolitics")] Geopolitics,            // Wars, border tensions, regional conflicts affecting risk sentiment
+		[Display(Name = "Economic Data")] EconomicData,         // Key data releases like GDP, trade balance, fiscal deficit, industrial production
+		[Display(Name = "Corporate")] Corporate,                // Major corporate events not captured by earnings/dividends, e.g., debt crisis, default, large M&A
+		[Display(Name = "Climate")] Climate                     // Short-term climate/energy shocks (hurricanes, floods, droughts) affecting markets
+	}
 	public class Dummy
 	{
 		public int Id { get; set; }          // Primary Key
@@ -88,23 +118,27 @@ namespace OM.MFPTracker.Data.Models
 		[Required(ErrorMessage = "Scheme Name is Required")]
 		[MaxLength(100)]
 		public string SchemeName { get; set; } = null!;
-
+		
+		// ==========================
+		// 🔹 Foreign Keys
+		// ==========================
 		public int AmcId { get; set; }
-
-		// Navigation
 		public Amc Amc { get; set; } = null!;
 		public int MFCategoryId { get; set; }
 
-		// Navigation
 		public MFCategory MFCategory { get; set; } = null!;
+
+
 
 		[Range(1, int.MaxValue, ErrorMessage = "Operational Status is required")]
 		public int OperationalStatusId { get; set; }
 		public OperationalStatus OperationalStatus { get; set; } = null!;
 
-		// NAV history
+		// ==========================
+		// 🔹 Navigation Collections
+		// ==========================
 		public ICollection<NavHistory> NavHistories { get; set; } = new List<NavHistory>();
-
+		public ICollection<FundTransaction> Transactions { get; set; } = new List<FundTransaction>();
 		public DateTime InDate { get; set; }//only for audit purposes
 	}
 
@@ -174,30 +208,6 @@ namespace OM.MFPTracker.Data.Models
 		public DateTime InDate { get; set; }
 	}
 	
-
-	public enum EventType
-	{
-		[Display(Name = "Major Event")] MajorEvent,				// High market impact, e.g., Budget, RBI policy, Election results
-		[Display(Name = "Minor Event")] MinorEvent,             // Low market impact, informational, e.g., holiday announcement
-		[Display(Name = "Regulatory")] Regulatory,				// Compliance or law-related events, e.g., SEBI/RBI circulars, T+1 settlement
-		[Display(Name = "Macro Economic")] Macroeconomic,       // Domestic macro indicators: GDP, inflation (CPI/WPI), IIP, PMI, employment
-		[Display(Name = "Monetary Policy")] MonetaryPolicy,     // RBI/Fed/ECB rate decisions, policy statements, liquidity measures
-		[Display(Name = "Elections")] Elections,				// Indian or global elections impacting market sentiment & volatility
-		[Display(Name = "Corporate Action")] CorporateAction,   // Dividends, splits, mergers, buybacks, corporate restructurings
-		[Display(Name = "Earnings Release")] EarningsRelease,   // Quarterly/annual financial results of companies
-		[Display(Name = "Global Event")] GlobalEvent,           // Major world events not directly economic, e.g., pandemics, global crises
-		[Display(Name = "Global Macro")] GlobalMacro,           // Global economic shocks, commodity shocks, EM risk-off, inflation, recession fears
-		[Display(Name = "Trade Policy")] TradePolicy,           // Tariffs, free trade agreements, import/export bans, India–US/China trade events
-		[Display(Name = "Market Milestone")] MarketMilestone,   // Sensex/Nifty record highs, market-cap milestones, structural reforms
-		[Display(Name = "Market Correction")] MarketCorrection, // Crashes, sharp drawdowns, volatility spikes
-		[Display(Name = "Technology")] Technology,				// AI disruptions, IT sector shocks, tech-led rallies or sell-offs
-		[Display(Name = "Climate Event")] ClimateEvent,         // El Niño, floods, droughts, agricultural shocks affecting prices
-		[Display(Name = "Geopolitics")] Geopolitics,			// Wars, border tensions, regional conflicts affecting risk sentiment
-		[Display(Name = "Economic Data")] EconomicData,         // Key data releases like GDP, trade balance, fiscal deficit, industrial production
-		[Display(Name = "Corporate")] Corporate,				// Major corporate events not captured by earnings/dividends, e.g., debt crisis, default, large M&A
-		[Display(Name = "Climate")] Climate						// Short-term climate/energy shocks (hurricanes, floods, droughts) affecting markets
-	}
-
 	public class SpecialEvent
 	{
 		public int Id { get; set; }
@@ -239,11 +249,9 @@ namespace OM.MFPTracker.Data.Models
 		// 🔹 Foreign Keys
 		// ==========================
 
-		[Required(ErrorMessage = "AMC is required.")]
 		public int? AmcId { get; set; }
 		public Amc Amc { get; set; } = null!;
 
-		[Required(ErrorMessage = "AMC is required.")]
 		public int? FolioHolderId { get; set; }
 		public FolioHolder FolioHolder { get; set; } = null!;
 
@@ -253,11 +261,83 @@ namespace OM.MFPTracker.Data.Models
 		// ==========================
 		// 🔹 Navigation Collections
 		// ==========================
-
-		//public ICollection<MFTransaction> Transactions { get; set; }
-		//	= new List<MFTransaction>();
-
-		//AMCID
-		//FolioOwnerId
+		public ICollection<FundTransaction> Transactions { get; set; } = new List<FundTransaction>();
 	}
+
+	public class FundTransaction
+	{
+		[Key]
+		public int FundTransactionId { get; set; }
+		[Required(ErrorMessage = "Transaction Type is mandatory")]
+		public TransactionType Type { get; set; }
+		[Required(ErrorMessage = "Transaction date is mandatory")]
+		public DateTime TransactionDate { get; set; }
+		[Required(ErrorMessage = "Units is mandatory and should be positive number only")]
+		public decimal Units { get; set; }
+		// Only for BUY
+		public decimal? UnitsLeft { get; set; }
+		[Required(ErrorMessage = "NAV is mandatory value")]
+		public decimal Nav { get; set; }
+		public decimal Amount { get; set; }
+
+		public decimal? Charges { get; set; }
+		[MaxLength(50, ErrorMessage = "Remarks shouldn't be more than 50 characters long")]
+		public string? Remarks { get; set; }
+		// Used to group split sells
+		public Guid? SellGroupId { get; set; }
+
+		// Optional: explicitly reference Buy lot
+		public int? ConsumedBuyTransactionId { get; set; }
+
+		public DateTime InDate { get; set; }//only for audit purposes
+		public DateTime UpdateDate { get; set; }//only for audit purposes
+
+		// ==========================
+		// 🔹 Foreign Keys
+		// ==========================
+		public int FolioId { get; set; }
+		public Folio Folio { get; set; }
+
+		public int FundId { get; set; }
+		public MutualFund Fund { get; set; }
+	}
+
+	//*******Flat structure Data Model*****//
+
+	public class MutualFundTransaction
+	{
+		[Key]
+		public int Id { get; set; }
+
+		[Required(ErrorMessage = "Transaction Date should be given")]
+		public DateTime Date { get; set; }                   // Trade/Transaction DateTime
+		[Required, MaxLength(30, ErrorMessage = "Folio shouldn't be more than 30 characters long")]
+		public string Folio { get; set; } = null!;
+
+		[Required, MaxLength(100, ErrorMessage = "Fund Name shouldn't be more than 100 characters long")]
+		public string FundName { get; set; } = null!;
+
+		[MaxLength(20, ErrorMessage = "Fund Code shouldn't be more than 20 characters long")]
+		public string? FundCode { get; set; }
+
+		[MaxLength(50, ErrorMessage = "Fund Type shouldn't be more than 50 characters long")]
+		public string? FundType { get; set; }                // e.g., "GR", "IDCW", "Multi Cap", etc.
+		[Required(ErrorMessage = "Units is mandatory value")]
+		public decimal Units { get; set; }                    // as requested (double)
+		[Required(ErrorMessage = "NAV Value is required")]
+		[Range(0.000001, double.MaxValue, ErrorMessage = "NAV must be greater than 0")]
+		public decimal NAV { get; set; }                     // as requested (double)
+		public decimal AmountPaid { get; set; }               // Calculated Value
+
+		[MaxLength(120, ErrorMessage = "Fund Source (Bank name) shouldn't be more than 120 characters long")]
+		public string? Source { get; set; }                  // Bank name or source
+
+		[MaxLength(500, ErrorMessage = "Any notes Code shouldn't be more than 500 characters long")]
+		public string? Note { get; set; }
+
+		// Optional: audit
+		public DateTime CreatedUtc { get; set; } 
+		public DateTime UpdatedUtc { get; set; }
+	}
+
 }

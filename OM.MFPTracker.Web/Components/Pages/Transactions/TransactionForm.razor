@@ -1,0 +1,124 @@
+﻿@using OM.MFPTracker.Data.Models
+
+@if (Visible)
+{
+    <div class="card mb-3">
+
+        <div class="card-body">
+
+            <h5>Transaction</h5>
+
+            <div class="row">
+
+                <div class="col-3">
+                    <label>Date</label>
+                    <InputDate class="form-control"
+                               @bind-Value="Transaction.TransactionDate" />
+                </div>
+
+                <div class="col-3">
+                    <label>Folio</label>
+                    <InputSelect class="form-select"
+                                 @bind-Value="Transaction.FolioId">
+
+                        <option value="">Select</option>
+
+                        @foreach (var f in Folios)
+                        {
+                            <option value="@f.FolioId">@f.FolioName</option>
+                        }
+
+                    </InputSelect>
+                </div>
+
+                <div class="col-3">
+                    <label>Fund</label>
+                    <InputSelect class="form-select"
+                                 @bind-Value="Transaction.FundId">
+
+                        <option value="">Select</option>
+
+                        @foreach (var f in Funds)
+                        {
+                            <option value="@f.Id">@f.SchemeName</option>
+                        }
+
+                    </InputSelect>
+                </div>
+
+                <div class="col-3">
+                    <label>Units</label>
+                    <InputNumber class="form-control"
+                                 @bind-Value="Transaction.Units" />
+                </div>
+
+                <div class="col-3 mt-2">
+                    <label>NAV</label>
+                    <InputNumber class="form-control"
+                                 @bind-Value="Transaction.Nav" />
+                </div>
+
+                <div class="col-3 mt-2">
+                    <label>Charges</label>
+                    <InputNumber class="form-control"
+                                 @bind-Value="Transaction.Charges" />
+                </div>
+
+                <div class="col-3 mt-2">
+                    <label>Remarks</label>
+                    <InputText class="form-control"
+                               @bind-Value="Transaction.Remarks" />
+                </div>
+
+            </div>
+
+            <div class="mt-3">
+
+                <button class="btn btn-success"
+                        @onclick="Save">
+                    Save
+                </button>
+
+                <button class="btn btn-secondary"
+                        @onclick="Cancel">
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+@code {
+
+    [Parameter] public bool Visible { get; set; }
+
+    [Parameter] public FundTransaction Transaction { get; set; } = new();
+
+    [Parameter] public List<Folio> Folios { get; set; } = new();
+
+    [Parameter] public List<MutualFund> Funds { get; set; } = new();
+
+    [Parameter] public EventCallback<FundTransaction> OnSave { get; set; }
+
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    async Task Save()
+    {
+        Transaction.Type = TransactionType.Buy;
+
+        Transaction.UnitsLeft = Transaction.Units;
+
+        Transaction.Amount = Transaction.Units * Transaction.Nav;
+
+        await OnSave.InvokeAsync(Transaction);
+    }
+
+    async Task Cancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+}

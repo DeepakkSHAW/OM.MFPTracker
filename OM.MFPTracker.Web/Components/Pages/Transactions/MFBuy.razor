@@ -1,0 +1,56 @@
+﻿@page "/buy-list/{FolioId:int}"
+
+@using OM.MFPTracker.Data.Models
+@using OM.MFPTracker.Data.Services
+@inject IBuyTransactionRepo BuyRepo
+<h3>MFBuy</h3>
+
+@code {
+    private List<FundTransaction>? transactions;
+    [Parameter]
+    public int FolioId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        if (FolioId <= 0)
+        {
+            FolioId = 1;
+        }
+        transactions = await BuyRepo.GetByFolioAsync(FolioId);
+        //transactions = await BuyRepo.GetByFolioAsync(FolioId);
+    }
+
+}
+
+
+<h3>Buy Transactions</h3>
+
+@if (transactions == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Units</th>
+                <th>NAV</th>
+                <th>Units Left</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in transactions)
+            {
+                <tr>
+                    <td>@item.TransactionDate.ToShortDateString()</td>
+                    <td>@item.Units</td>
+                    <td>@item.Nav</td>
+                    <td>@item.UnitsLeft</td>
+                    <td>@item.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

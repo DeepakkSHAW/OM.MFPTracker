@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OM.MFPTracker.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFolio : Migration
+    public partial class SeedFundTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -116,8 +116,8 @@ namespace OM.MFPTracker.Data.Migrations
                     FolioPurpose = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
                     FolioIsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     AttachedBank = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
-                    AmcId = table.Column<int>(type: "INTEGER", nullable: false),
-                    FolioHolderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AmcId = table.Column<int>(type: "INTEGER", nullable: true),
+                    FolioHolderId = table.Column<int>(type: "INTEGER", nullable: true),
                     InDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
@@ -128,14 +128,12 @@ namespace OM.MFPTracker.Data.Migrations
                         name: "FK_TFolio_TAMC_AmcId",
                         column: x => x.AmcId,
                         principalTable: "TAMC",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TFolio_TFolioHolder_FolioHolderId",
                         column: x => x.FolioHolderId,
                         principalTable: "TFolioHolder",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -171,6 +169,50 @@ namespace OM.MFPTracker.Data.Migrations
                         name: "FK_TMutualFunds_TOperationalStatus_OperationalStatusId",
                         column: x => x.OperationalStatusId,
                         principalTable: "TOperationalStatus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TFundTransaction",
+                columns: table => new
+                {
+                    FundTransactionId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    TransactionDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Units = table.Column<decimal>(type: "TEXT", precision: 18, scale: 6, nullable: false),
+                    UnitsLeft = table.Column<decimal>(type: "TEXT", nullable: true),
+                    Nav = table.Column<decimal>(type: "TEXT", precision: 18, scale: 6, nullable: false),
+                    Amount = table.Column<decimal>(type: "TEXT", precision: 18, scale: 2, nullable: false),
+                    Charges = table.Column<decimal>(type: "TEXT", precision: 18, scale: 4, nullable: true),
+                    Remarks = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    SellGroupId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    ConsumedBuyTransactionId = table.Column<int>(type: "INTEGER", nullable: true),
+                    InDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    FolioId = table.Column<int>(type: "INTEGER", nullable: false),
+                    FundId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TFundTransaction", x => x.FundTransactionId);
+                    table.ForeignKey(
+                        name: "FK_TFundTransaction_TFolio_FolioId",
+                        column: x => x.FolioId,
+                        principalTable: "TFolio",
+                        principalColumn: "FolioId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TFundTransaction_TFundTransaction_ConsumedBuyTransactionId",
+                        column: x => x.ConsumedBuyTransactionId,
+                        principalTable: "TFundTransaction",
+                        principalColumn: "FundTransactionId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TFundTransaction_TMutualFunds_FundId",
+                        column: x => x.FundId,
+                        principalTable: "TMutualFunds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -330,6 +372,11 @@ namespace OM.MFPTracker.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "TFundTransaction",
+                columns: new[] { "FundTransactionId", "Amount", "Charges", "ConsumedBuyTransactionId", "FolioId", "FundId", "Nav", "Remarks", "SellGroupId", "TransactionDate", "Type", "Units", "UnitsLeft" },
+                values: new object[] { 1, 12050.00m, 10.50m, null, 1, 1, 120.50m, "Initial purchase", null, new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 100.000000m, 60.000000m });
+
+            migrationBuilder.InsertData(
                 table: "TNavHistory",
                 columns: new[] { "Id", "MutualFundId", "NavDate", "NavValue" },
                 values: new object[,]
@@ -337,6 +384,11 @@ namespace OM.MFPTracker.Data.Migrations
                     { 1, 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 125.4321m },
                     { 2, 1, new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 126.1000m }
                 });
+
+            migrationBuilder.InsertData(
+                table: "TFundTransaction",
+                columns: new[] { "FundTransactionId", "Amount", "Charges", "ConsumedBuyTransactionId", "FolioId", "FundId", "Nav", "Remarks", "SellGroupId", "TransactionDate", "Type", "Units", "UnitsLeft" },
+                values: new object[] { 2, 6030.00m, 5.25m, 1, 1, 1, 150.75m, "Partial profit booking", new Guid("3e9f2c0d-5e0a-4f1c-9f8b-9c9b3b7f0a11"), new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, 40.000000m, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_TAMC_Code",
@@ -359,6 +411,26 @@ namespace OM.MFPTracker.Data.Migrations
                 table: "TFolio",
                 column: "FolioName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TFundTransaction_ConsumedBuyTransactionId",
+                table: "TFundTransaction",
+                column: "ConsumedBuyTransactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TFundTransaction_FolioId",
+                table: "TFundTransaction",
+                column: "FolioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TFundTransaction_FundId",
+                table: "TFundTransaction",
+                column: "FundId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TFundTransaction_SellGroupId",
+                table: "TFundTransaction",
+                column: "SellGroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TMFCategory_CategoryName",
@@ -412,7 +484,7 @@ namespace OM.MFPTracker.Data.Migrations
                 name: "DummyTable");
 
             migrationBuilder.DropTable(
-                name: "TFolio");
+                name: "TFundTransaction");
 
             migrationBuilder.DropTable(
                 name: "TNavHistory");
@@ -421,10 +493,13 @@ namespace OM.MFPTracker.Data.Migrations
                 name: "TSpecialEvents");
 
             migrationBuilder.DropTable(
-                name: "TFolioHolder");
+                name: "TFolio");
 
             migrationBuilder.DropTable(
                 name: "TMutualFunds");
+
+            migrationBuilder.DropTable(
+                name: "TFolioHolder");
 
             migrationBuilder.DropTable(
                 name: "TAMC");

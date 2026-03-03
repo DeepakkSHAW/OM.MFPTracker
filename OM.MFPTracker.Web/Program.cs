@@ -36,8 +36,9 @@ namespace OM.MFPTracker.Web
 			builder.Services.AddScoped<IAmcRepo, AmcRepo>();
 			builder.Services.AddScoped<IOperationalStatusRepo, OperationalStatusRepo>();
 			builder.Services.AddScoped<IFolioRepo, FolioRepo>();
-			/////////////
-
+            builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
+			builder.Services.AddScoped<IBuyTransactionRepo, BuyTransactionRepo>();
+            builder.Services.AddScoped<IMFTransactionRepo, MFTransactionRepo>();
 			// Add services to the container.
 			builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
